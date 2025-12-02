@@ -452,6 +452,7 @@
             <option value="4CIA">4ª Cia</option>
             <option value="5CIA">5ª Cia</option>
             <option value="FT">Cia FT</option>
+            <option value="EM">EM - Estado Maior</option>
           </select>
         </div>
         
@@ -564,37 +565,64 @@
     </div>
 
     <div class="card">
+      
       <div class="card-titulo">Cadastrar nova viatura</div>
       <form id="formViatura">
         <div class="linha">
           <div class="campo">
+            <label>Companhia / Origem</label>
+            <select id="v_cia" required>
+              <option value="">Selecione</option>
+              <option value="1CIA">1ª Cia PM – Presidente Prudente</option>
+              <option value="2CIA">2ª Cia PM – Martinópolis e região</option>
+              <option value="3CIA">3ª Cia PM – Pirapozinho e região</option>
+              <option value="4CIA">4ª Cia PM – Álvares Machado e região</option>
+              <option value="5CIA">5ª Cia PM – Presidente Prudente</option>
+              <option value="FT">Cia FT – toda a região</option>
+              <option value="EM">Estado Maior – 18º BPM/I</option>
+            </select>
+          </div>
+          <div class="campo">
             <label>Município</label>
             <input id="v_mun" required placeholder="Ex.: Martinópolis">
           </div>
+        </div>
+        <div class="linha">
           <div class="campo">
             <label>Programa</label>
             <input id="v_prog" required placeholder="RP, Escolta, Cmt Cia...">
           </div>
-        </div>
-        <div class="linha">
           <div class="campo">
             <label>Prefixo</label>
             <input id="v_pref" required placeholder="Ex.: I-18200">
           </div>
+        </div>
+        <div class="linha">
           <div class="campo">
             <label>Placa</label>
             <input id="v_placa" placeholder="Ex.: ABC1D23">
           </div>
-        </div>
-        <div class="linha">
           <div class="campo">
             <label>Modelo</label>
             <input id="v_modelo" placeholder="Ex.: Spin, Trailblazer...">
           </div>
+        </div>
+        <div class="linha">
           <div class="campo">
             <label>Situação</label>
             <select id="v_sit">
               <option value="OPERANDO">OPERANDO</option>
+              <option value="BAIXADA">BAIXADA</option>
+            </select>
+          </div>
+          <div class="campo">
+            <label>Observação</label>
+            <input id="v_obs" placeholder="Ex.: RP MARTINÓPOLIS/DELEGADA">
+          </div>
+        </div>
+        <button type="submit" id="btnSubmitViatura">Cadastrar viatura</button>
+      </form>
+ERANDO</option>
               <option value="BAIXADA">BAIXADA</option>
             </select>
           </div>
@@ -712,7 +740,9 @@
   const manuStatus = document.getElementById("manuStatus");
   const manuDesc   = document.getElementById("manuDesc");
 
+  
   const formViatura = document.getElementById("formViatura");
+  const v_cia   = document.getElementById("v_cia");
   const v_mun   = document.getElementById("v_mun");
   const v_prog  = document.getElementById("v_prog");
   const v_pref  = document.getElementById("v_pref");
@@ -721,6 +751,7 @@
   const v_sit   = document.getElementById("v_sit");
   const v_obs   = document.getElementById("v_obs");
   const btnSubmitViatura = document.getElementById("btnSubmitViatura");
+
 
   const tipoRelatorio     = document.getElementById("tipoRelatorio");
   const relPrefixo        = document.getElementById("relPrefixo");
@@ -970,7 +1001,9 @@
   formViatura.addEventListener("submit", async (e) => {
     e.preventDefault();
 
+    
     const payload = {
+      cia:        v_cia.value,
       municipio:  v_mun.value.trim(),
       programa:   v_prog.value.trim(),
       prefixo:    v_pref.value.trim(),
@@ -978,11 +1011,11 @@
       modelo:     v_modelo.value.trim().toUpperCase(),
       situacao:   v_sit.value,
       observacao: v_obs.value.trim(),
-      ts:         Date.now(),
-      cia:        CIA_ID
+      ts:         Date.now()
     };
 
-    if (!payload.municipio || !payload.programa || !payload.prefixo) {
+
+    if (!v_cia.value || !payload.municipio || !payload.programa || !payload.prefixo) {
       alert("Preencha Município, Programa e Prefixo.");
       return;
     }
@@ -997,6 +1030,7 @@
         alert("Viatura cadastrada com sucesso.");
       }
 
+      v_cia.value = "";
       v_mun.value = "";
       v_prog.value = "";
       v_pref.value = "";
@@ -1019,6 +1053,7 @@
     }
     viaturaEmEdicaoId = viaturaSelecionada.id;
 
+    v_cia.value   = viaturaSelecionada.cia || "";
     v_mun.value   = viaturaSelecionada.municipio || "";
     v_prog.value  = viaturaSelecionada.programa || "";
     v_pref.value  = viaturaSelecionada.prefixo || "";
