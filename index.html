@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gestão de Frota - 18º BPM/I</title>
+  <style>
+    :root{
+      --amarelo:#FFFF00;
+      --amarelo-neon:#f9ff7a;
+      --cinza:#cfcfcf;
+      --cinza-escuro:#777;
+      --bg:#000000;
+      --card-bg:rgba(10,10,15,0.96);
+      --radius:16px;
+      --shadow:0 18px 45px rgba(0,0,0,0.9);
+    }
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{
+      min-height:100vh;
+      font-family:Arial,Helvetica,sans-serif;
+      background:
+        radial-gradient(circle at top,#222 0,#050509 55%,#000 100%);
+      color:var(--amarelo);
+      display:flex;
+      flex-direction:column;
+    }
+
+    header{
+      padding:14px 18px 10px;
+      border-bottom:1px solid rgba(255,255,255,0.18);
+      background:
+        linear-gradient(90deg,#000 0,#111 40%,#000 100%);
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:16px;
+      flex-wrap:wrap;
+    }
+    .titulo-box{
+      display:flex;
+      flex-direction:column;
+      gap:4px;
+      min-width:230px;
+    }
+    .titulo{
+      font-size:1.3rem;
+      letter-spacing:1px;
+      text-transform:uppercase;
+    }
+    .subtitulo{
+      font-size:0.8rem;
+      color:var(--cinza);
+    }
+    .badge-sistema{
+      border:1px solid rgba(255,255,255,0.35);
+      border-radius:999px;
+      padding:4px 14px;
+      font-size:0.75rem;
+      text-transform:uppercase;
+      letter-spacing:0.1em;
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      background:rgba(0,0,0,0.75);
+    }
+    .badge-dot{
+      width:9px;
+      height:9px;
+      border-radius:999px;
+      background:var(--amarelo-neon);
+      box-shadow:0 0 10px var(--amarelo-neon);
+    }
+
+    .header-right{
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+      align-items:flex-end;
+      min-width:260px;
+    }
+    .auth-box{
+      display:flex;
+      flex-direction:column;
+      gap:4px;
+      align-items:flex-end;
+      font-size:0.75rem;
+      color:var(--cinza);
+    }
+    .login-form{
+      display:flex;
+      gap:4px;
+      align-items:center;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+    }
+    .login-form input{
+      width:120px;
+      padding:4px 8px;
+      font-size:0.72rem;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,0.25);
+      background:#000;
+      color:var(--amarelo);
+      outline:none;
+    }
+    .login-form button{
+      margin-top:0;
+      padding:4px 10px;
+      font-size:0.72rem;
+      border:none;
+      border-radius:999px;
+      cursor:pointer;
+      background:linear-gradient(135deg,var(--amarelo-neon),var(--amarelo));
+      color:#000;
+      font-weight:600;
+    }
+
+    main{
+      flex:1;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:24px 16px;
+    }
+
+    .container{
+      width:100%;
+      max-width:1040px;
+      display:flex;
+      flex-direction:column;
+      gap:16px;
+    }
+
+    .intro{
+      font-size:0.85rem;
+      color:var(--cinza);
+    }
+
+    .grid-companhias{
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+      gap:16px;
+      margin-top:8px;
+    }
+
+    .card-cia{
+      background:var(--card-bg);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      border:1px solid rgba(255,255,255,0.08);
+      padding:14px 16px;
+      cursor:pointer;
+      transition:transform 0.12s ease, box-shadow 0.12s ease, border-color 0.12s ease;
+      position:relative;
+      overflow:hidden;
+    }
+    .card-cia::before{
+      content:"";
+      position:absolute;
+      inset:0;
+      background:radial-gradient(circle at top,rgba(255,255,0,0.12),transparent 55%);
+      opacity:0;
+      transition:opacity 0.15s ease;
+      pointer-events:none;
+    }
+    .card-cia:hover{
+      transform:translateY(-3px);
+      border-color:rgba(255,255,120,0.7);
+      box-shadow:0 22px 50px rgba(0,0,0,0.95);
+    }
+    .card-cia:hover::before{
+      opacity:1;
+    }
+
+    .card-cia-titulo{
+      font-size:1rem;
+      text-transform:uppercase;
+      letter-spacing:0.1em;
+      margin-bottom:4px;
+    }
+    .card-cia-sub{
+      font-size:0.8rem;
+      color:var(--cinza);
+      margin-bottom:10px;
+    }
+    .card-cia-tag{
+      font-size:0.7rem;
+      text-transform:uppercase;
+      letter-spacing:0.12em;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,0.25);
+      padding:3px 10px;
+      display:inline-block;
+      background:rgba(0,0,0,0.7);
+      color:var(--cinza);
+    }
+
+    .card-cia-footer{
+      margin-top:10px;
+      font-size:0.72rem;
+      color:var(--cinza-escuro);
+    }
+
+    .desabilitado{
+      opacity:0.45;
+      cursor:not-allowed;
+    }
+
+    .msg-login{
+      font-size:0.8rem;
+      color:var(--cinza);
+      margin-top:4px;
+    }
+
+    @media(max-width:700px){
+      main{
+        align-items:flex-start;
+        padding-top:18px;
+      }
+    }
+  </style>
+</head>
+<body>
+<header>
+  <div class="titulo-box">
+    <div class="titulo">Gestão de Frota · 18º BPM/I</div>
+    <div class="subtitulo">Selecione a Companhia para acessar o módulo de frota</div>
+  </div>
+
+  <div class="header-right">
+    <div class="badge-sistema">
+      <span class="badge-dot"></span>
+      <span>Sistema Online · Uso Interno</span>
+    </div>
+    <div class="auth-box">
+      <div id="infoUsuario">Faça login para liberar o acesso às Companhias.</div>
+      <form class="login-form" id="formLogin">
+        <input id="loginUser" placeholder="Login" autocomplete="off">
+        <input id="loginPass" type="password" placeholder="Senha">
+        <button type="submit" id="btnLogin">Entrar</button>
+        <button type="button" id="btnLogout" style="display:none;">Sair</button>
+      </form>
+      <div class="msg-login" id="msgLoginExtra">
+        Acesso restrito ao efetivo autorizado do 18º BPM/I.
+      </div>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="container">
+    <div class="intro">
+      Após realizar o login, escolha abaixo a Companhia desejada para abrir o painel de frota correspondente.
+    </div>
+
+    <div class="grid-companhias" id="gridCias">
+      <div class="card-cia desabilitado" data-target="frota_cia1.html">
+        <div class="card-cia-titulo">1ª Cia PM</div>
+        <div class="card-cia-sub">Módulo de gestão de frota da 1ª Companhia.</div>
+        <span class="card-cia-tag">Área urbana de Adamantina</span>
+        <div class="card-cia-footer">Clique para abrir o painel da 1ª Cia.</div>
+      </div>
+
+      <div class="card-cia desabilitado" data-target="frota_cia2.html">
+        <div class="card-cia-titulo">2ª Cia PM</div>
+        <div class="card-cia-sub">Módulo de gestão de frota da 2ª Companhia.</div>
+        <span class="card-cia-tag">Martinópolis e região</span>
+        <div class="card-cia-footer">Clique para abrir o painel da 2ª Cia.</div>
+      </div>
+
+      <div class="card-cia desabilitado" data-target="frota_cia3.html">
+        <div class="card-cia-titulo">3ª Cia PM</div>
+        <div class="card-cia-sub">Módulo de gestão de frota da 3ª Companhia.</div>
+        <span class="card-cia-tag">Flórida Paulista / Pacaembu</span>
+        <div class="card-cia-footer">Clique para abrir o painel da 3ª Cia.</div>
+      </div>
+
+      <div class="card-cia desabilitado" data-target="frota_cia4.html">
+        <div class="card-cia-titulo">4ª Cia PM</div>
+        <div class="card-cia-sub">Módulo de gestão de frota da 4ª Companhia.</div>
+        <span class="card-cia-tag">Lucélia e região</span>
+        <div class="card-cia-footer">Clique para abrir o painel da 4ª Cia.</div>
+      </div>
+
+      <div class="card-cia desabilitado" data-target="frota_cia5.html">
+        <div class="card-cia-titulo">5ª Cia PM</div>
+        <div class="card-cia-sub">Módulo de gestão de frota da 5ª Companhia.</div>
+        <span class="card-cia-tag">Osvaldo Cruz e região</span>
+        <div class="card-cia-footer">Clique para abrir o painel da 5ª Cia.</div>
+      </div>
+
+      <div class="card-cia desabilitado" data-target="frota_cia_ft.html">
+        <div class="card-cia-titulo">Cia FT</div>
+        <div class="card-cia-sub">Módulo de gestão de frota da Força Tática.</div>
+        <span class="card-cia-tag">Atuação em toda a área do Batalhão</span>
+        <div class="card-cia-footer">Clique para abrir o painel da Cia FT.</div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script type="module">
+  import { usuariosAutorizados } from "./logins.js";
+
+  let usuarioLogado = null;
+
+  const infoUsuario = document.getElementById("infoUsuario");
+  const formLogin   = document.getElementById("formLogin");
+  const loginUser   = document.getElementById("loginUser");
+  const loginPass   = document.getElementById("loginPass");
+  const btnLogout   = document.getElementById("btnLogout");
+  const gridCias    = document.getElementById("gridCias");
+
+  function atualizarEstado() {
+    const cards = gridCias.querySelectorAll(".card-cia");
+    if (usuarioLogado) {
+      infoUsuario.textContent = `Logado como ${usuarioLogado.login}. Acesso liberado às Companhias.`;
+      btnLogout.style.display = "inline-block";
+      cards.forEach(c => c.classList.remove("desabilitado"));
+    } else {
+      infoUsuario.textContent = "Faça login para liberar o acesso às Companhias.";
+      btnLogout.style.display = "none";
+      cards.forEach(c => c.classList.add("desabilitado"));
+    }
+  }
+
+  formLogin.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const loginDigitado = loginUser.value.trim();
+    const senhaDigitada = loginPass.value.trim();
+
+    if (!loginDigitado || !senhaDigitada) {
+      alert("Informe login e senha.");
+      return;
+    }
+
+    const usuario = usuariosAutorizados.find(u =>
+      u.login.toLowerCase() === loginDigitado.toLowerCase() &&
+      u.senha === senhaDigitada
+    );
+
+    if (!usuario) {
+      alert("Login ou senha inválidos.");
+      return;
+    }
+
+    usuarioLogado = { login: usuario.login };
+    loginPass.value = "";
+    atualizarEstado();
+  });
+
+  btnLogout.addEventListener("click", () => {
+    usuarioLogado = null;
+    atualizarEstado();
+  });
+
+  gridCias.addEventListener("click", (e) => {
+    const card = e.target.closest(".card-cia");
+    if (!card) return;
+
+    if (!usuarioLogado) {
+      alert("Faça login para acessar o módulo da Companhia.");
+      return;
+    }
+
+    const destino = card.getAttribute("data-target");
+    if (destino) {
+      window.location.href = destino;
+    }
+  });
+
+  atualizarEstado();
+</script>
+
+</body>
+</html>

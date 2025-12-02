@@ -1,0 +1,1332 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gestão de Frota - 1ª Cia do 18º BPM/I</title>
+  <style>
+    :root{
+      --amarelo:#FFFF00;
+      --amarelo-neon:#f9ff7a;
+      --cinza:#cfcfcf;
+      --cinza-escuro:#777;
+      --bg:#000000;
+      --card-bg:rgba(10,10,15,0.96);
+      --radius:16px;
+      --shadow:0 18px 45px rgba(0,0,0,0.9);
+    }
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{
+      min-height:100vh;
+      font-family:Arial,Helvetica,sans-serif;
+      background:
+        radial-gradient(circle at top,#222 0,#050509 55%,#000 100%);
+      color:var(--amarelo);
+      display:flex;
+      flex-direction:column;
+    }
+
+    header{
+      padding:14px 18px 10px;
+      border-bottom:1px solid rgba(255,255,255,0.18);
+      background:
+        linear-gradient(90deg,#000 0,#111 40%,#000 100%);
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:16px;
+      flex-wrap:wrap;
+    }
+    .titulo-box{
+      display:flex;
+      flex-direction:column;
+      gap:4px;
+      min-width:230px;
+    }
+    .titulo{
+      font-size:1.3rem;
+      letter-spacing:1px;
+      text-transform:uppercase;
+    }
+    .subtitulo{
+      font-size:0.8rem;
+      color:var(--cinza);
+    }
+    .badge-sistema{
+      border:1px solid rgba(255,255,255,0.35);
+      border-radius:999px;
+      padding:4px 14px;
+      font-size:0.75rem;
+      text-transform:uppercase;
+      letter-spacing:0.1em;
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      background:rgba(0,0,0,0.75);
+    }
+    .badge-dot{
+      width:9px;
+      height:9px;
+      border-radius:999px;
+      background:var(--amarelo-neon);
+      box-shadow:0 0 10px var(--amarelo-neon);
+    }
+
+    .header-right{
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+      align-items:flex-end;
+      min-width:260px;
+    }
+    .auth-box{
+      display:flex;
+      flex-direction:column;
+      gap:4px;
+      align-items:flex-end;
+      font-size:0.75rem;
+      color:var(--cinza);
+    }
+    .login-form{
+      display:flex;
+      gap:4px;
+      align-items:center;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+    }
+    .login-form input{
+      width:120px;
+      padding:4px 8px;
+      font-size:0.72rem;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,0.25);
+      background:#000;
+      color:var(--amarelo);
+      outline:none;
+    }
+
+    main{
+      flex:1;
+      display:flex;
+      gap:18px;
+      padding:16px;
+    }
+
+    .painel-esquerdo{
+      flex:1.45;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+    }
+    .painel-direito{
+      flex:1;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      min-width:280px;
+    }
+
+    .card{
+      background:var(--card-bg);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      border:1px solid rgba(255,255,255,0.08);
+      padding:12px 14px;
+    }
+    .card-titulo{
+      font-size:0.92rem;
+      text-transform:uppercase;
+      letter-spacing:0.1em;
+      margin-bottom:8px;
+      color:var(--cinza);
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:8px;
+      flex-wrap:wrap;
+    }
+
+    .indicadores{
+      display:flex;
+      flex-wrap:wrap;
+      gap:6px;
+    }
+    .chip{
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,0.22);
+      padding:4px 9px;
+      font-size:0.72rem;
+      background:rgba(0,0,0,0.8);
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      color:var(--cinza);
+    }
+    .chip strong{
+      color:var(--amarelo-neon);
+      font-weight:600;
+    }
+
+    .filtros{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      margin-bottom:4px;
+    }
+    .campo{
+      display:flex;
+      flex-direction:column;
+      gap:3px;
+      min-width:130px;
+    }
+    .campo label{
+      font-size:0.7rem;
+      text-transform:uppercase;
+      letter-spacing:0.09em;
+      color:var(--cinza);
+    }
+    select,input{
+      background:#050509;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,0.22);
+      padding:6px 11px;
+      color:var(--amarelo);
+      font-size:0.8rem;
+      outline:none;
+    }
+    input::placeholder{color:#777;}
+    textarea{
+      background:#050509;
+      border-radius:12px;
+      border:1px solid rgba(255,255,255,0.22);
+      padding:6px 9px;
+      color:var(--amarelo);
+      font-size:0.8rem;
+      min-height:54px;
+      resize:vertical;
+    }
+
+    .tabela-wrapper{
+      overflow:auto;
+      border-radius:var(--radius);
+      border:1px solid rgba(255,255,255,0.18);
+      max-height:62vh;
+    }
+    table{
+      width:100%;
+      border-collapse:collapse;
+      font-size:0.8rem;
+    }
+    thead{
+      background:rgba(255,255,255,0.04);
+      position:sticky;
+      top:0;
+      z-index:1;
+    }
+    th,td{
+      padding:6px 8px;
+      white-space:nowrap;
+    }
+    th{
+      text-align:left;
+      font-size:0.72rem;
+      text-transform:uppercase;
+      letter-spacing:0.09em;
+      color:var(--cinza);
+      border-bottom:1px solid rgba(255,255,255,0.2);
+    }
+    tbody tr{
+      cursor:pointer;
+      transition:background 0.15s ease, transform 0.06s ease;
+    }
+    tbody tr:nth-child(even){background:rgba(255,255,255,0.01);}
+    tbody tr:hover{
+      background:rgba(255,255,255,0.07);
+      transform:translateY(-1px);
+    }
+
+    .status-pill{
+      display:inline-flex;
+      align-items:center;
+      padding:2px 8px;
+      border-radius:999px;
+      font-size:0.7rem;
+      text-transform:uppercase;
+      letter-spacing:0.07em;
+    }
+    .status-operando{
+      background:rgba(0,180,0,0.18);
+      border:1px solid rgba(0,220,0,0.7);
+      color:#b2ffba;
+    }
+    .status-baixada{
+      background:rgba(220,0,0,0.18);
+      border:1px solid rgba(255,60,60,0.8);
+      color:#ffc0c0;
+    }
+
+    .detalhes-header{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:10px;
+      margin-bottom:6px;
+      flex-wrap:wrap;
+    }
+    .detalhes-titulo{
+      font-size:1rem;
+      text-transform:uppercase;
+      letter-spacing:0.1em;
+    }
+    .detalhes-sub{
+      font-size:0.8rem;
+      color:var(--cinza);
+    }
+    .tag-mini{
+      font-size:0.65rem;
+      padding:2px 8px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,0.25);
+      text-transform:uppercase;
+      letter-spacing:0.1em;
+      background:rgba(0,0,0,0.78);
+      color:var(--cinza);
+      display:inline-block;
+      margin-top:2px;
+    }
+
+    .historico-lista{
+      list-style:none;
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+      max-height:170px;
+      overflow:auto;
+      padding-right:4px;
+    }
+    .hist-item{
+      border-radius:10px;
+      border:1px solid rgba(255,255,255,0.18);
+      padding:6px 8px;
+      background:rgba(5,5,12,0.97);
+      font-size:0.75rem;
+    }
+    .hist-top{
+      display:flex;
+      justify-content:space-between;
+      gap:6px;
+      margin-bottom:2px;
+    }
+    .hist-tipo{
+      font-weight:600;
+      text-transform:uppercase;
+      letter-spacing:0.09em;
+      font-size:0.7rem;
+    }
+    .hist-data{
+      font-size:0.7rem;
+      color:var(--cinza);
+    }
+    .hist-desc{color:var(--cinza);margin-top:2px;}
+    .hist-km{font-size:0.7rem;color:var(--amarelo-neon);margin-top:2px;}
+
+    .msg-vazia{
+      font-size:0.75rem;
+      color:var(--cinza);
+      font-style:italic;
+    }
+
+    form{
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+      margin-top:4px;
+    }
+    form .linha{
+      display:flex;
+      gap:6px;
+      flex-wrap:wrap;
+    }
+    form .linha .campo{
+      flex:1;
+      min-width:130px;
+    }
+
+    button{
+      border:none;
+      border-radius:999px;
+      padding:7px 13px;
+      margin-top:2px;
+      font-size:0.8rem;
+      text-transform:uppercase;
+      letter-spacing:0.1em;
+      cursor:pointer;
+      background:linear-gradient(135deg,var(--amarelo-neon),var(--amarelo));
+      color:#000;
+      font-weight:600;
+      box-shadow:0 0 15px rgba(255,255,120,0.55);
+      align-self:flex-end;
+    }
+    button:hover{
+      filter:brightness(1.06);
+      transform:translateY(-1px);
+    }
+
+    .login-form button{
+      margin-top:0;
+      padding:4px 10px;
+      font-size:0.72rem;
+      box-shadow:none;
+      align-self:auto;
+    }
+
+    .acoes-detalhes{
+      margin-top:8px;
+      display:flex;
+      gap:8px;
+      justify-content:flex-end;
+      flex-wrap:wrap;
+    }
+    .btn-excluir{
+      background:linear-gradient(135deg,#ff8888,#ff0000);
+      color:#000;
+      box-shadow:0 0 15px rgba(255,80,80,0.6);
+    }
+    .btn-excluir:hover{
+      filter:brightness(1.05);
+    }
+    .btn-editar{
+      background:linear-gradient(135deg,#88c3ff,#005eff);
+      color:#000;
+      box-shadow:0 0 15px rgba(120,170,255,0.6);
+    }
+
+    .ctrl-disabled,
+    .btn-disabled{
+      opacity:0.5;
+      cursor:not-allowed !important;
+    }
+
+    @media(max-width:900px){
+      main{flex-direction:column;}
+      .painel-direito{order:-1;}
+      .tabela-wrapper{max-height:50vh;}
+      header{align-items:flex-start;}
+      .header-right{align-items:flex-start;}
+    }
+
+    .status-erro{
+      color:#ff6b6b;
+      font-weight:bold;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="titulo-box">
+    <div class="titulo">Gestão de Frota • 1ª Cia do 18º BPM/I</div>
+    <div class="subtitulo">Situação operacional, baixas e manutenções das viaturas da área da 1ª Cia PM</div>
+  </div>
+
+  <div class="header-right">
+    <div class="badge-sistema">
+      <span class="badge-dot"></span>
+      <span>Sistema Online · Uso Interno</span>
+    </div>
+    <div class="auth-box">
+      <div id="infoUsuario">Modo visualização (não logado).</div>
+      <form class="login-form" id="formLogin">
+        <input id="loginUser" placeholder="Login" autocomplete="off">
+        <input id="loginPass" type="password" placeholder="Senha">
+        <button type="submit" id="btnLogin">Entrar</button>
+        <button type="button" id="btnLogout" style="display:none;">Sair</button>
+      </form>
+    </div>
+  </div>
+</header>
+
+<main>
+  <!-- ESQUERDA: FROTA -->
+  <section class="painel-esquerdo">
+    <div class="card">
+      <div class="card-titulo">
+        <span>Frota cadastrada</span>
+        <div class="indicadores">
+          <span class="chip">Total: <strong id="totViaturas">0</strong></span>
+          <span class="chip">Operando: <strong id="totOperando">0</strong></span>
+          <span class="chip">Baixadas: <strong id="totBaixadas">0</strong></span>
+        </div>
+      </div>
+
+      <div class="filtros">
+        <div class="campo">
+          <label for="filtroMunicipio">Município</label>
+          <select id="filtroMunicipio">
+            <option value="">Todos</option>
+          </select>
+        </div>
+        <div class="campo">
+          <label for="filtroSituacao">Situação</label>
+          <select id="filtroSituacao">
+            <option value="">Todas</option>
+            <option value="OPERANDO">Operando</option>
+            <option value="BAIXADA">Baixada</option>
+          </select>
+        </div>
+        <div class="campo">
+          <label for="filtroBusca">Buscar</label>
+          <input id="filtroBusca" type="text" placeholder="Prefixo, programa, placa, modelo, obs...">
+        </div>
+      </div>
+
+      <div class="tabela-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Município</th>
+              <th>Programa</th>
+              <th>Prefixo</th>
+              <th>Placa</th>
+              <th>Modelo</th>
+              <th>Situação</th>
+              <th>Observação</th>
+            </tr>
+          </thead>
+          <tbody id="tabelaFrota"></tbody>
+        </table>
+      </div>
+
+      <div style="margin-top:6px;font-size:0.72rem;color:var(--cinza);">
+        <span id="statusSistema">Carregando dados da frota...</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- DIREITA: DETALHES / HISTÓRICO / FORMULÁRIOS / RELATÓRIOS -->
+  <section class="painel-direito">
+
+    <div class="card">
+      <div class="detalhes-header">
+        <div>
+          <div class="detalhes-titulo" id="detPrefixo">Selecione uma viatura</div>
+          <div class="detalhes-sub" id="detInfo"></div>
+        </div>
+        <div id="detStatus"></div>
+      </div>
+      <span class="tag-mini" id="detObs"></span>
+      <div class="acoes-detalhes">
+        <button type="button" id="btnEditarViatura" class="btn-editar">Editar viatura</button>
+        <button type="button" id="btnExcluirViatura" class="btn-excluir">Excluir viatura</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-titulo">Histórico de manutenções</div>
+      <ul class="historico-lista" id="listaHistorico">
+        <li class="msg-vazia">Selecione uma viatura para ver o histórico.</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <div class="card-titulo">Novo lançamento de manutenção</div>
+      <form id="formManutencao">
+        <div class="linha">
+          <div class="campo">
+            <label>Data</label>
+            <input type="date" id="manuData" required>
+          </div>
+          <div class="campo">
+            <label>Tipo</label>
+            <select id="manuTipo" required>
+              <option value="">Selecione</option>
+              <option>Troca de óleo</option>
+              <option>Preventiva</option>
+              <option>Corretiva</option>
+              <option>Outro</option>
+            </select>
+          </div>
+        </div>
+        <div class="linha">
+          <div class="campo">
+            <label>Km</label>
+            <input type="number" id="manuKm">
+          </div>
+          <div class="campo">
+            <label>Status</label>
+            <select id="manuStatus">
+              <option>Executada</option>
+              <option>Prevista</option>
+            </select>
+          </div>
+        </div>
+        <div class="campo">
+          <label>Descrição</label>
+          <textarea id="manuDesc" placeholder="Detalhes do serviço, peças, OS, empresa..."></textarea>
+        </div>
+        <button type="submit">Salvar manutenção</button>
+      </form>
+    </div>
+
+    <div class="card">
+      <div class="card-titulo">Cadastrar nova viatura</div>
+      <form id="formViatura">
+        <div class="linha">
+          <div class="campo">
+            <label>Município</label>
+            <input id="v_mun" required placeholder="Ex.: Martinópolis">
+          </div>
+          <div class="campo">
+            <label>Programa</label>
+            <input id="v_prog" required placeholder="RP, Escolta, Cmt Cia...">
+          </div>
+        </div>
+        <div class="linha">
+          <div class="campo">
+            <label>Prefixo</label>
+            <input id="v_pref" required placeholder="Ex.: I-18200">
+          </div>
+          <div class="campo">
+            <label>Placa</label>
+            <input id="v_placa" placeholder="Ex.: ABC1D23">
+          </div>
+        </div>
+        <div class="linha">
+          <div class="campo">
+            <label>Modelo</label>
+            <input id="v_modelo" placeholder="Ex.: Spin, Trailblazer...">
+          </div>
+          <div class="campo">
+            <label>Situação</label>
+            <select id="v_sit">
+              <option value="OPERANDO">OPERANDO</option>
+              <option value="BAIXADA">BAIXADA</option>
+            </select>
+          </div>
+        </div>
+        <div class="linha">
+          <div class="campo">
+            <label>Observação</label>
+            <input id="v_obs" placeholder="Ex.: RP MARTINOPOLIS/DELEGADA">
+          </div>
+        </div>
+        <button type="submit" id="btnSubmitViatura">Cadastrar viatura</button>
+      </form>
+    </div>
+
+    <div class="card">
+      <div class="card-titulo">Relatórios de manutenções</div>
+      <div class="filtros relatorios">
+        <div class="campo">
+          <label for="tipoRelatorio">Tipo</label>
+          <select id="tipoRelatorio">
+            <option value="viatura">Por viatura</option>
+            <option value="periodo">Por período</option>
+          </select>
+        </div>
+        <div class="campo" id="grupoRelPrefixo">
+          <label for="relPrefixo">Prefixo</label>
+          <select id="relPrefixo">
+            <option value="">Selecione</option>
+          </select>
+        </div>
+        <div class="campo" id="grupoRelDataIni" style="display:none;">
+          <label for="relDataIni">Data inicial</label>
+          <input type="date" id="relDataIni">
+        </div>
+        <div class="campo" id="grupoRelDataFim" style="display:none;">
+          <label for="relDataFim">Data final</label>
+          <input type="date" id="relDataFim">
+        </div>
+        <div class="campo" id="grupoRelMunicipio" style="display:none;">
+          <label for="relMunicipio">Município (opcional)</label>
+          <select id="relMunicipio">
+            <option value="">Todos</option>
+          </select>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px;">
+        <button type="button" id="btnRelTela">Gerar na tela</button>
+        <button type="button" id="btnRelCsv">Exportar CSV</button>
+      </div>
+      <div id="relResultado" style="margin-top:8px;max-height:190px;overflow:auto;font-size:0.75rem;color:var(--cinza);border-top:1px solid rgba(255,255,255,0.12);padding-top:6px;">
+        Selecione o tipo de relatório e preencha os filtros.
+      </div>
+    </div>
+
+  </section>
+</main>
+
+<!-- FIREBASE + LÓGICA -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+  import {
+    getDatabase, ref, set, push, onValue
+  } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-database.js";
+  import { usuariosAutorizados } from "./logins.js";
+
+  // *** ATENÇÃO: preenchar com os dados REAIS do projeto frota18-a985c ***
+  const firebaseConfig = {
+    apiKey: "SUA_API_KEY_AQUI",
+    authDomain: "frota18-a985c.firebaseapp.com",
+    databaseURL: "https://frota18-a985c-default-rtdb.firebaseio.com/",
+    projectId: "frota18-a985c",
+    storageBucket: "frota18-a985c.appspot.com",
+    messagingSenderId: "SEU_SENDER_ID_AQUI",
+    appId: "SEU_APP_ID_AQUI"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db  = getDatabase(app);
+
+  let usuarioLogado = null;
+
+  const infoUsuario = document.getElementById("infoUsuario");
+  const formLogin   = document.getElementById("formLogin");
+  const loginUser   = document.getElementById("loginUser");
+  const loginPass   = document.getElementById("loginPass");
+  const btnLogout   = document.getElementById("btnLogout");
+
+  // ===== VARIÁVEIS =====
+  let viaturas = [];
+  let manutencoes = [];
+  let viaturaSelecionada = null;
+  let viaturaEmEdicaoId = null;
+
+  // ===== ELEMENTOS =====
+  const tabelaFrota     = document.getElementById("tabelaFrota");
+  const filtroMunicipio = document.getElementById("filtroMunicipio");
+  const filtroSituacao  = document.getElementById("filtroSituacao");
+  const filtroBusca     = document.getElementById("filtroBusca");
+  const totViaturas     = document.getElementById("totViaturas");
+  const totOperando     = document.getElementById("totOperando");
+  const totBaixadas     = document.getElementById("totBaixadas");
+  const statusSistema   = document.getElementById("statusSistema");
+
+  const detPrefixo = document.getElementById("detPrefixo");
+  const detInfo    = document.getElementById("detInfo");
+  const detStatus  = document.getElementById("detStatus");
+  const detObs     = document.getElementById("detObs");
+  const listaHistorico = document.getElementById("listaHistorico");
+  const btnExcluirViatura = document.getElementById("btnExcluirViatura");
+  const btnEditarViatura  = document.getElementById("btnEditarViatura");
+
+  const formManutencao = document.getElementById("formManutencao");
+  const manuData   = document.getElementById("manuData");
+  const manuTipo   = document.getElementById("manuTipo");
+  const manuKm     = document.getElementById("manuKm");
+  const manuStatus = document.getElementById("manuStatus");
+  const manuDesc   = document.getElementById("manuDesc");
+
+  const formViatura = document.getElementById("formViatura");
+  const v_mun   = document.getElementById("v_mun");
+  const v_prog  = document.getElementById("v_prog");
+  const v_pref  = document.getElementById("v_pref");
+  const v_placa = document.getElementById("v_placa");
+  const v_modelo = document.getElementById("v_modelo");
+  const v_sit   = document.getElementById("v_sit");
+  const v_obs   = document.getElementById("v_obs");
+  const btnSubmitViatura = document.getElementById("btnSubmitViatura");
+
+  // Relatórios
+  const tipoRelatorio     = document.getElementById("tipoRelatorio");
+  const relPrefixo        = document.getElementById("relPrefixo");
+  const relDataIni        = document.getElementById("relDataIni");
+  const relDataFim        = document.getElementById("relDataFim");
+  const relMunicipio      = document.getElementById("relMunicipio");
+  const grupoRelPrefixo   = document.getElementById("grupoRelPrefixo");
+  const grupoRelDataIni   = document.getElementById("grupoRelDataIni");
+  const grupoRelDataFim   = document.getElementById("grupoRelDataFim");
+  const grupoRelMunicipio = document.getElementById("grupoRelMunicipio");
+  const btnRelTela        = document.getElementById("btnRelTela");
+  const btnRelCsv         = document.getElementById("btnRelCsv");
+  const relResultado      = document.getElementById("relResultado");
+
+  // Elementos restritos (só logado pode mexer)
+  const elementosRestritos = [
+    ...formManutencao.querySelectorAll("input, select, textarea, button"),
+    ...formViatura.querySelectorAll("input, select, textarea, button"),
+    btnExcluirViatura,
+    btnEditarViatura
+  ];
+
+  function formataDataBr(iso) {
+    if (!iso) return "";
+    const [y,m,d] = iso.split("-");
+    return `${d}/${m}/${y}`;
+  }
+
+  function preencherFiltroMunicipio() {
+    const municipios = Array.from(new Set(viaturas.map(v => v.municipio))).sort();
+    filtroMunicipio.innerHTML = '<option value="">Todos</option>';
+    municipios.forEach(m => {
+      if (!m) return;
+      const opt = document.createElement("option");
+      opt.value = m;
+      opt.textContent = m;
+      filtroMunicipio.appendChild(opt);
+    });
+  }
+
+  function preencherCombosRelatorios() {
+    const prefixos = Array.from(new Set(viaturas.map(v => v.prefixo))).sort();
+    relPrefixo.innerHTML = '<option value="">Selecione</option>';
+    prefixos.forEach(p => {
+      if (!p) return;
+      const opt = document.createElement("option");
+      opt.value = p;
+      opt.textContent = p;
+      relPrefixo.appendChild(opt);
+    });
+
+    const municipios = Array.from(new Set(viaturas.map(v => v.municipio))).sort();
+    relMunicipio.innerHTML = '<option value="">Todos</option>';
+    municipios.forEach(m => {
+      if (!m) return;
+      const opt = document.createElement("option");
+      opt.value = m;
+      opt.textContent = m;
+      relMunicipio.appendChild(opt);
+    });
+  }
+
+  function aplicaFiltros(v) {
+    if (filtroMunicipio.value && v.municipio !== filtroMunicipio.value) return false;
+    if (filtroSituacao.value && v.situacao !== filtroSituacao.value) return false;
+    const termo = filtroBusca.value.trim().toLowerCase();
+    if (termo) {
+      const combinado = (
+        (v.prefixo || "") + " " +
+        (v.programa || "") + " " +
+        (v.placa || "") + " " +
+        (v.modelo || "") + " " +
+        (v.observacao || "")
+      ).toLowerCase();
+      if (!combinado.includes(termo)) return false;
+    }
+    return true;
+  }
+
+  function renderTabela() {
+    tabelaFrota.innerHTML = "";
+    let operando = 0, baixadas = 0;
+
+    const filtrados = viaturas.filter(aplicaFiltros);
+
+    filtrados.forEach(v => {
+      if (v.situacao === "OPERANDO") operando++;
+      if (v.situacao === "BAIXADA")  baixadas++;
+
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${v.municipio || ""}</td>
+        <td>${v.programa || ""}</td>
+        <td>${v.prefixo || ""}</td>
+        <td>${v.placa || ""}</td>
+        <td>${v.modelo || ""}</td>
+        <td>
+          <span class="status-pill ${v.situacao === "OPERANDO" ? "status-operando" : "status-baixada"}">
+            ${v.situacao || ""}
+          </span>
+        </td>
+        <td>${v.observacao || ""}</td>
+      `;
+      tr.addEventListener("click", () => selecionarViatura(v.id));
+      tabelaFrota.appendChild(tr);
+    });
+
+    totViaturas.textContent = filtrados.length;
+    totOperando.textContent = operando;
+    totBaixadas.textContent = baixadas;
+    statusSistema.textContent = `Dados carregados (${viaturas.length} viaturas no total).`;
+    statusSistema.classList.remove("status-erro");
+  }
+
+  function selecionarViatura(id) {
+    viaturaSelecionada = viaturas.find(v => v.id === id);
+    if (!viaturaSelecionada) return;
+
+    detPrefixo.textContent = viaturaSelecionada.prefixo || "Sem prefixo";
+    const infoPlaca = viaturaSelecionada.placa ? ` • Placa ${viaturaSelecionada.placa}` : "";
+    const infoModelo = viaturaSelecionada.modelo ? ` • Modelo ${viaturaSelecionada.modelo}` : "";
+    detInfo.textContent    = `${viaturaSelecionada.programa || ""} • ${viaturaSelecionada.municipio || ""}${infoPlaca}${infoModelo}`;
+    detObs.textContent     = viaturaSelecionada.observacao || "Sem observações";
+
+    detStatus.innerHTML = "";
+    const span = document.createElement("span");
+    span.className = "status-pill " + (viaturaSelecionada.situacao === "OPERANDO" ? "status-operando" : "status-baixada");
+    span.textContent = viaturaSelecionada.situacao || "";
+    detStatus.appendChild(span);
+
+    renderHistorico();
+  }
+
+  function renderHistorico() {
+    listaHistorico.innerHTML = "";
+    if (!viaturaSelecionada) {
+      const li = document.createElement("li");
+      li.className = "msg-vazia";
+      li.textContent = "Selecione uma viatura para visualizar o histórico.";
+      listaHistorico.appendChild(li);
+      return;
+    }
+
+    const historico = manutencoes
+      .filter(m => m.prefixo === viaturaSelecionada.prefixo)
+      .sort((a,b) => (b.ts || 0) - (a.ts || 0));
+
+    if (!historico.length) {
+      const li = document.createElement("li");
+      li.className = "msg-vazia";
+      li.textContent = "Nenhuma manutenção lançada para esta viatura.";
+      listaHistorico.appendChild(li);
+      return;
+    }
+
+    historico.forEach(item => {
+      const li = document.createElement("li");
+      li.className = "hist-item";
+      li.innerHTML = `
+        <div class="hist-top">
+          <span class="hist-tipo">${item.tipo} • ${item.status}</span>
+          <span class="hist-data">${formataDataBr(item.data)}</span>
+        </div>
+        ${item.km ? `<div class="hist-km">Km: ${item.km}</div>` : ""}
+        ${item.descricao ? `<div class="hist-desc">${item.descricao}</div>` : ""}
+      `;
+      listaHistorico.appendChild(li);
+    });
+  }
+
+  function atualizarPermissoes() {
+    const podeEditar = !!usuarioLogado;
+    elementosRestritos.forEach(el => {
+      if (!el) return;
+      if (el.tagName === "BUTTON") {
+        el.disabled = !podeEditar;
+        if (!podeEditar) el.classList.add("btn-disabled");
+        else el.classList.remove("btn-disabled");
+      } else {
+        if (el.tagName === "SELECT") {
+          el.disabled = !podeEditar;
+        } else if (el.tagName === "INPUT" || el.tagName === "TEXTAREA") {
+          el.readOnly = !podeEditar;
+        }
+        if (!podeEditar) el.classList.add("ctrl-disabled");
+        else el.classList.remove("ctrl-disabled");
+      }
+    });
+
+    if (usuarioLogado) {
+      infoUsuario.textContent = `Logado como ${usuarioLogado.login} (pode cadastrar/editar/excluir).`;
+      btnLogout.style.display = "inline-block";
+    } else {
+      infoUsuario.textContent = "Modo visualização (não logado). Apenas leitura.";
+      btnLogout.style.display = "none";
+    }
+  }
+
+  formLogin.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const loginDigitado = loginUser.value.trim();
+    const senhaDigitada = loginPass.value.trim();
+
+    if (!loginDigitado || !senhaDigitada) {
+      alert("Informe login e senha.");
+      return;
+    }
+
+    const usuario = usuariosAutorizados.find(u =>
+      u.login.toLowerCase() === loginDigitado.toLowerCase() &&
+      u.senha === senhaDigitada
+    );
+
+    if (!usuario) {
+      alert("Login ou senha inválidos.");
+      return;
+    }
+
+    usuarioLogado = { login: usuario.login };
+    loginPass.value = "";
+    atualizarPermissoes();
+  });
+
+  btnLogout.addEventListener("click", () => {
+    usuarioLogado = null;
+    atualizarPermissoes();
+  });
+
+  onValue(ref(db, "viaturas"), (snapshot) => {
+    const obj = snapshot.val() || {};
+    const arr = [];
+    for (const [id, v] of Object.entries(obj)) {
+      arr.push({ id, ...v });
+    }
+    viaturas = arr;
+    preencherFiltroMunicipio();
+    preencherCombosRelatorios();
+    renderTabela();
+
+    if (!viaturaSelecionada && viaturas.length > 0) {
+      selecionarViatura(viaturas[0].id);
+    } else if (viaturaSelecionada) {
+      const aindaExiste = viaturas.find(v => v.id === viaturaSelecionada.id);
+      if (aindaExiste) {
+        selecionarViatura(aindaExiste.id);
+      } else {
+        viaturaSelecionada = null;
+        detPrefixo.textContent = "Selecione uma viatura";
+        detInfo.textContent    = "";
+        detObs.textContent     = "";
+        detStatus.innerHTML    = "";
+        renderHistorico();
+      }
+    }
+  }, (error) => {
+    console.error("Erro ao carregar viaturas:", error);
+    statusSistema.textContent = "Erro ao carregar dados da frota: " + (error.code || error.message);
+    statusSistema.classList.add("status-erro");
+  });
+
+  onValue(ref(db, "manutencoes"), (snapshot) => {
+    const obj = snapshot.val() || {};
+    const arr = [];
+    for (const [id, v] of Object.entries(obj)) {
+      arr.push({ id, ...v });
+    }
+    manutencoes = arr;
+    renderHistorico();
+  }, (error) => {
+    console.error("Erro ao carregar manutenções:", error);
+  });
+
+  formManutencao.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    if (!usuarioLogado) {
+      alert("Apenas usuários logados podem lançar manutenções.");
+      return;
+    }
+
+    if (!viaturaSelecionada) {
+      alert("Selecione uma viatura na tabela antes de lançar a manutenção.");
+      return;
+    }
+    if (!manuData.value || !manuTipo.value) {
+      alert("Preencha pelo menos data e tipo da manutenção.");
+      return;
+    }
+
+    const manut = {
+      prefixo: viaturaSelecionada.prefixo,
+      data: manuData.value,
+      tipo: manuTipo.value,
+      km: manuKm.value ? parseInt(manuKm.value,10) : null,
+      status: manuStatus.value || "Executada",
+      descricao: manuDesc.value.trim(),
+      ts: Date.now()
+    };
+
+    try {
+      const novaRef = push(ref(db, "manutencoes"));
+      await set(novaRef, manut);
+      alert("Manutenção registrada com sucesso.");
+      manuData.value = "";
+      manuTipo.value = "";
+      manuKm.value   = "";
+      manuDesc.value = "";
+    } catch (e2) {
+      console.error("Erro ao salvar manutenção:", e2);
+      alert("Erro ao salvar manutenção:\n" + (e2.code || e2.message));
+    }
+  });
+
+  formViatura.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    if (!usuarioLogado) {
+      alert("Apenas usuários logados podem cadastrar ou editar viaturas.");
+      return;
+    }
+
+    const payload = {
+      municipio:  v_mun.value.trim(),
+      programa:   v_prog.value.trim(),
+      prefixo:    v_pref.value.trim(),
+      placa:      v_placa.value.trim().toUpperCase(),
+      modelo:     v_modelo.value.trim().toUpperCase(),
+      situacao:   v_sit.value,
+      observacao: v_obs.value.trim(),
+      ts:         Date.now()
+    };
+
+    if (!payload.municipio || !payload.programa || !payload.prefixo) {
+      alert("Preencha Município, Programa e Prefixo.");
+      return;
+    }
+
+    try {
+      if (viaturaEmEdicaoId) {
+        await set(ref(db, "viaturas/" + viaturaEmEdicaoId), payload);
+        alert("Viatura atualizada com sucesso.");
+      } else {
+        const novaRef = push(ref(db, "viaturas"));
+        await set(novaRef, payload);
+        alert("Viatura cadastrada com sucesso.");
+      }
+
+      v_mun.value = "";
+      v_prog.value = "";
+      v_pref.value = "";
+      v_placa.value = "";
+      v_modelo.value = "";
+      v_obs.value = "";
+      v_sit.value = "OPERANDO";
+      viaturaEmEdicaoId = null;
+      btnSubmitViatura.textContent = "Cadastrar viatura";
+    } catch (e2) {
+      console.error("Erro ao salvar viatura:", e2);
+      alert("Erro ao salvar viatura:\n" + (e2.code || e2.message));
+    }
+  });
+
+  btnEditarViatura.addEventListener("click", () => {
+    if (!usuarioLogado) {
+      alert("Apenas usuários logados podem editar viaturas.");
+      return;
+    }
+    if (!viaturaSelecionada) {
+      alert("Selecione uma viatura na tabela para editar.");
+      return;
+    }
+    viaturaEmEdicaoId = viaturaSelecionada.id;
+
+    v_mun.value   = viaturaSelecionada.municipio || "";
+    v_prog.value  = viaturaSelecionada.programa || "";
+    v_pref.value  = viaturaSelecionada.prefixo || "";
+    v_placa.value = viaturaSelecionada.placa || "";
+    v_modelo.value = viaturaSelecionada.modelo || "";
+    v_sit.value   = viaturaSelecionada.situacao || "OPERANDO";
+    v_obs.value   = viaturaSelecionada.observacao || "";
+
+    btnSubmitViatura.textContent = "Salvar alterações";
+
+    formViatura.scrollIntoView({ behavior: "smooth", block: "start" });
+  });
+
+  btnExcluirViatura.addEventListener("click", async () => {
+    if (!usuarioLogado) {
+      alert("Apenas usuários logados podem excluir viaturas.");
+      return;
+    }
+    if (!viaturaSelecionada) {
+      alert("Selecione uma viatura para excluir.");
+      return;
+    }
+    const confirmar = confirm(
+      `Confirma excluir a viatura ${viaturaSelecionada.prefixo} ` +
+      `(${viaturaSelecionada.municipio}, ${viaturaSelecionada.programa}) ` +
+      `e todo o histórico de manutenções dela?`
+    );
+    if (!confirmar) return;
+
+    try {
+      await set(ref(db, "viaturas/" + viaturaSelecionada.id), null);
+
+      const prefixoAlvo = viaturaSelecionada.prefixo;
+      const promessas = manutencoes
+        .filter(m => m.prefixo === prefixoAlvo)
+        .map(m => set(ref(db, "manutencoes/" + m.id), null));
+      await Promise.all(promessas);
+
+      alert("Viatura e manutenções excluídas com sucesso.");
+
+      viaturaSelecionada = null;
+      viaturaEmEdicaoId  = null;
+      detPrefixo.textContent = "Selecione uma viatura";
+      detInfo.textContent    = "";
+      detObs.textContent     = "";
+      detStatus.innerHTML    = "";
+      renderHistorico();
+      btnSubmitViatura.textContent = "Cadastrar viatura";
+      v_mun.value = v_prog.value = v_pref.value = v_placa.value = v_modelo.value = v_obs.value = "";
+      v_sit.value = "OPERANDO";
+    } catch (e2) {
+      console.error("Erro ao excluir viatura:", e2);
+      alert("Erro ao excluir viatura:\n" + (e2.code || e2.message));
+    }
+  });
+
+  [filtroMunicipio, filtroSituacao].forEach(el => el.addEventListener("change", renderTabela));
+  filtroBusca.addEventListener("input", renderTabela);
+
+  tipoRelatorio.addEventListener("change", () => {
+    if (tipoRelatorio.value === "viatura") {
+      grupoRelPrefixo.style.display   = "";
+      grupoRelDataIni.style.display   = "none";
+      grupoRelDataFim.style.display   = "none";
+      grupoRelMunicipio.style.display = "none";
+    } else {
+      grupoRelPrefixo.style.display   = "none";
+      grupoRelDataIni.style.display   = "";
+      grupoRelDataFim.style.display   = "";
+      grupoRelMunicipio.style.display = "";
+    }
+    relResultado.textContent = "Selecione o tipo de relatório e preencha os filtros.";
+  });
+
+  function obterManutencoesFiltradas() {
+    if (!manutencoes.length) {
+      alert("Não há manutenções cadastradas.");
+      return null;
+    }
+
+    if (tipoRelatorio.value === "viatura") {
+      const pref = relPrefixo.value;
+      if (!pref) {
+        alert("Selecione um prefixo para o relatório por viatura.");
+        return null;
+      }
+      const lista = manutencoes
+        .filter(m => m.prefixo === pref)
+        .sort((a,b) => (a.data || "").localeCompare(b.data || ""));
+      return lista.map(m => {
+        const v = viaturas.find(vt => vt.prefixo === m.prefixo) || {};
+        return {
+          ...m,
+          municipio: v.municipio || "",
+          programa:  v.programa  || ""
+        };
+      });
+    } else {
+      if (!relDataIni.value || !relDataFim.value) {
+        alert("Informe data inicial e final para o relatório por período.");
+        return null;
+      }
+      const ini = relDataIni.value;
+      const fim = relDataFim.value;
+      const mun = relMunicipio.value;
+
+      const lista = manutencoes.filter(m => {
+        if (!m.data) return false;
+        if (m.data < ini || m.data > fim) return false;
+        const v = viaturas.find(vt => vt.prefixo === m.prefixo) || {};
+        if (mun && v.municipio !== mun) return false;
+        return true;
+      }).sort((a,b) => (a.data || "").localeCompare(b.data || ""));
+
+      return lista.map(m => {
+        const v = viaturas.find(vt => vt.prefixo === m.prefixo) || {};
+        return {
+          ...m,
+          municipio: v.municipio || "",
+          programa:  v.programa  || ""
+        };
+      });
+    }
+  }
+
+  btnRelTela.addEventListener("click", () => {
+    const registros = obterManutencoesFiltradas();
+    if (!registros) return;
+
+    if (!registros.length) {
+      relResultado.textContent = "Nenhuma manutenção encontrada para os filtros informados.";
+      return;
+    }
+
+    let tituloExtra = "";
+    if (tipoRelatorio.value === "viatura") {
+      tituloExtra = `Prefixo: ${registros[0].prefixo}`;
+    } else {
+      tituloExtra = `Período: ${formataDataBr(relDataIni.value)} a ${formataDataBr(relDataFim.value)}`;
+      if (relMunicipio.value) {
+        tituloExtra += ` · Município: ${relMunicipio.value}`;
+      }
+    }
+
+    let html = `<div style="margin-bottom:4px;font-size:0.75rem;color:${getComputedStyle(document.body).getPropertyValue('--cinza') || '#cfcfcf'};">
+      ${tituloExtra} · Registros: ${registros.length}
+    </div>`;
+    html += `
+      <table style="width:100%;border-collapse:collapse;font-size:0.75rem;">
+        <thead>
+          <tr>
+            <th style="border-bottom:1px solid rgba(255,255,255,0.2);padding:4px 6px;text-align:left;">Data</th>
+            <th style="border-bottom:1px solid rgba(255,255,255,0.2);padding:4px 6px;text-align:left;">Prefixo</th>
+            <th style="border-bottom:1px solid rgba(255,255,255,0.2);padding:4px 6px;text-align:left;">Município</th>
+            <th style="border-bottom:1px solid rgba(255,255,255,0.2);padding:4px 6px;text-align:left;">Programa</th>
+            <th style="border-bottom:1px solid rgba(255,255,255,0.2);padding:4px 6px;text-align:left;">Tipo</th>
+            <th style="border-bottom:1px solid rgba(255,255,255,0.2);padding:4px 6px;text-align:left;">Status</th>
+            <th style="border-bottom:1px solid rgba(255,255,255,0.2);padding:4px 6px;text-align:left;">Km</th>
+            <th style="border-bottom:1px solid rgba(255,255,255,0.2);padding:4px 6px;text-align:left;">Descrição</th>
+          </tr>
+        </thead>
+        <tbody>
+    `;
+    registros.forEach(r => {
+      html += `
+        <tr>
+          <td style="padding:3px 6px;">${formataDataBr(r.data)}</td>
+          <td style="padding:3px 6px;">${r.prefixo || ""}</td>
+          <td style="padding:3px 6px;">${r.municipio || ""}</td>
+          <td style="padding:3px 6px;">${r.programa || ""}</td>
+          <td style="padding:3px 6px;">${r.tipo || ""}</td>
+          <td style="padding:3px 6px;">${r.status || ""}</td>
+          <td style="padding:3px 6px;">${r.km != null ? r.km : ""}</td>
+          <td style="padding:3px 6px;">${r.descricao || ""}</td>
+        </tr>
+      `;
+    });
+    html += `</tbody></table>`;
+    relResultado.innerHTML = html;
+  });
+
+  btnRelCsv.addEventListener("click", () => {
+    const registros = obterManutencoesFiltradas();
+    if (!registros) return;
+
+    if (!registros.length) {
+      alert("Nenhuma manutenção encontrada para os filtros informados.");
+      return;
+    }
+
+    const cabecalho = ["Data","Prefixo","Município","Programa","Tipo","Status","Km","Descrição"];
+    const linhas = [cabecalho];
+
+    registros.forEach(r => {
+      linhas.push([
+        formataDataBr(r.data),
+        r.prefixo || "",
+        r.municipio || "",
+        r.programa || "",
+        r.tipo || "",
+        r.status || "",
+        r.km != null ? r.km : "",
+        r.descricao || ""
+      ]);
+    });
+
+    const csv = linhas.map(linha =>
+      linha.map(val => `"${String(val ?? "").replace(/"/g,'""')}"`).join(";")
+    ).join("\r\n");
+
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    const nomeArquivo = (tipoRelatorio.value === "viatura" && registros[0])
+      ? `relatorio_manutencoes_${registros[0].prefixo}.csv`
+      : `relatorio_manutencoes_periodo.csv`;
+    a.href = url;
+    a.download = nomeArquivo;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  });
+
+  atualizarPermissoes();
+</script>
+
+</body>
+</html>
