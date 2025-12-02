@@ -6,7 +6,7 @@ export const usuariosAutorizados = [
   // Acesso geral (para testes)
   {
     login: "Fenille",
-    senha: "Tatico25",
+    senha: "140965",
     modulos: ["1CIA","2CIA","3CIA","4CIA","5CIA","FT","BTL"]
   },
 
