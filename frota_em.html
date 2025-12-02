@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Gestão de Frota - 18º BPM/I (Visão Geral)</title>
+  <title>Gestão de Frota - Estado Maior do 18º BPM/I</title>
   <style>
     :root{
       --amarelo:#FFFF00;
@@ -413,8 +413,8 @@
 
 <header>
   <div class="titulo-box">
-    <div class="titulo">Gestão de Frota • 18º BPM/I - Visão geral</div>
-    <div class="subtitulo">Visão consolidada das viaturas do 18º BPM/I (todas as Companhias)</div>
+    <div class="titulo">Gestão de Frota • Estado Maior do 18º BPM/I</div>
+    <div class="subtitulo">Situação operacional, baixas e manutenções das viaturas da Estado Maior</div>
   </div>
 
   <div class="header-right">
@@ -443,19 +443,6 @@
       <div class="filtros">
         
         <div class="campo">
-          <label for="filtroCia">Cia</label>
-          <select id="filtroCia">
-            <option value="">Todas</option>
-            <option value="1CIA">1ª Cia</option>
-            <option value="2CIA">2ª Cia</option>
-            <option value="3CIA">3ª Cia</option>
-            <option value="4CIA">4ª Cia</option>
-            <option value="5CIA">5ª Cia</option>
-            <option value="FT">Cia FT</option>
-          </select>
-        </div>
-        
-        <div class="campo">
           <label for="filtroMunicipio">Município</label>
           <select id="filtroMunicipio">
             <option value="">Todos</option>
@@ -479,7 +466,7 @@
         <table>
           <thead>
             <tr>
-              <th>Cia</th>
+              
               <th>Município</th>
               <th>Programa</th>
               <th>Prefixo</th>
@@ -669,8 +656,8 @@
   };
 
 
-  const CIA_ID = null;
-  const IS_BTL = true;
+  const CIA_ID = "EM";
+  const IS_BTL = false;
 
   const app = initializeApp(firebaseConfig);
   const db  = getDatabase(app);
@@ -806,7 +793,7 @@
 
       const tr = document.createElement("tr");
       tr.innerHTML = `
-        <td>${v.cia || ''}</td>
+        
         <td>${v.municipio || ""}</td>
         <td>${v.programa || ""}</td>
         <td>${v.prefixo || ""}</td>
