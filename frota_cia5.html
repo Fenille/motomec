@@ -79,6 +79,29 @@
       align-items:flex-end;
       min-width:260px;
     }
+    .top-actions{
+      display:flex;
+      gap:8px;
+      align-items:center;
+      justify-content:flex-end;
+      flex-wrap:wrap;
+    }
+    .btn-voltar{
+      border:none;
+      border-radius:999px;
+      padding:4px 12px;
+      font-size:0.72rem;
+      text-transform:uppercase;
+      letter-spacing:0.1em;
+      cursor:pointer;
+      background:#111;
+      color:var(--cinza);
+      border:1px solid rgba(255,255,255,0.3);
+    }
+    .btn-voltar:hover{
+      filter:brightness(1.1);
+    }
+
     .auth-box{
       display:flex;
       flex-direction:column;
@@ -107,7 +130,7 @@
 
     main{
       flex:1;
-      display:flex;
+      display:none; /* só aparece após login */
       gap:18px;
       padding:16px;
     }
@@ -430,12 +453,15 @@
   </div>
 
   <div class="header-right">
-    <div class="badge-sistema">
-      <span class="badge-dot"></span>
-      <span>Sistema Online · Uso Interno</span>
+    <div class="top-actions">
+      <button class="btn-voltar" type="button" id="btnVoltar">← Voltar à página inicial</button>
+      <div class="badge-sistema">
+        <span class="badge-dot"></span>
+        <span>Sistema Online · Uso Interno</span>
+      </div>
     </div>
     <div class="auth-box">
-      <div id="infoUsuario">Modo visualização (não logado). Apenas leitura.</div>
+      <div id="infoUsuario">Faça login para acessar este módulo.</div>
       <form class="login-form" id="formLogin">
         <input id="loginUser" placeholder="Login" autocomplete="off">
         <input id="loginPass" type="password" placeholder="Senha">
@@ -674,12 +700,20 @@
     messagingSenderId: "120947990174",
     appId: "1:120947990174:web:c02805ea916c62f950e58f",
     measurementId: "G-9SP9K5H0HE",
-    databaseURL: "https://gestaoviaturas-daf3e-default-rtdb.firebaseio.com/"
+    databaseURL: "https://frota18-a985c-default-rtdb.firebaseio.com/"
   };
 
 
   const app = initializeApp(firebaseConfig);
   const db  = getDatabase(app);
+
+  const mainEl = document.querySelector("main");
+  const btnVoltar = document.getElementById("btnVoltar");
+  if (btnVoltar) {
+    btnVoltar.addEventListener("click", () => {
+      window.location.href = "index.html";
+    });
+  }
 
   let usuarioLogado = null;
 
@@ -903,6 +937,11 @@
 
   function atualizarPermissoes() {
     const podeEditar = !!usuarioLogado;
+
+    if (mainEl) {
+      mainEl.style.display = podeEditar ? "flex" : "none";
+    }
+
     elementosRestritos.forEach(el => {
       if (!el) return;
       if (el.tagName === "BUTTON") {
@@ -921,10 +960,10 @@
     });
 
     if (usuarioLogado) {
-      infoUsuario.textContent = `Logado como ${usuarioLogado.login} (pode cadastrar/editar/excluir).`;
+      infoUsuario.textContent = `Logado como ${usuarioLogado.login} (acesso liberado ao módulo).`;
       btnLogout.style.display = "inline-block";
     } else {
-      infoUsuario.textContent = "Modo visualização (não logado). Apenas leitura.";
+      infoUsuario.textContent = "Faça login para acessar este módulo.";
       btnLogout.style.display = "none";
     }
   }
