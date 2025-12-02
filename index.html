@@ -362,37 +362,111 @@
 </div>
 
 
+
 <script type="module">
   import { usuariosAutorizados } from "./logins.js";
+
+  const overlay    = document.getElementById("loginOverlay");
+  const form       = document.getElementById("loginForm");
+  const inputUser  = document.getElementById("loginUserModal");
+  const inputPass  = document.getElementById("loginPassModal");
+  const msgErro    = document.getElementById("loginErro");
+  const lblAlvo    = document.getElementById("loginAlvo");
+  const btnCancel  = document.getElementById("btnLoginCancel");
+
+  let destinoModulo = null;
+  let moduloAlvo    = null;
+
+  function obterChaveModulo(destino){
+    if (!destino) return null;
+    const url = destino.toLowerCase();
+    if (url.includes("cia1"))      return "1CIA";
+    if (url.includes("cia2"))      return "2CIA";
+    if (url.includes("cia3"))      return "3CIA";
+    if (url.includes("cia4"))      return "4CIA";
+    if (url.includes("cia5"))      return "5CIA";
+    if (url.includes("cia_ft"))    return "FT";
+    if (url.includes("batalhao"))  return "BTL";
+    return null;
+  }
+
+  function abrirModal(destino, tituloAlvo){
+    destinoModulo = destino;
+    moduloAlvo    = obterChaveModulo(destino);
+    msgErro.textContent = "";
+    inputUser.value = "";
+    inputPass.value = "";
+    lblAlvo.textContent = tituloAlvo ? ("Painel: " + tituloAlvo) : "";
+    overlay.classList.remove("hidden");
+    inputUser.focus();
+  }
+
+  function fecharModal(){
+    overlay.classList.add("hidden");
+    destinoModulo = null;
+    moduloAlvo    = null;
+  }
 
   document.querySelectorAll(".card-cia").forEach(card => {
     card.addEventListener("click", () => {
       const destino = card.getAttribute("data-target");
       if (!destino) return;
-
-      const login = prompt("Login:");
-      if (!login) return;
-
-      const senha = prompt("Senha:");
-      if (!senha) return;
-
-      const usuario = usuariosAutorizados.find(u =>
-        u.login.toLowerCase() === login.toLowerCase() &&
-        u.senha === senha
-      );
-
-      if (!usuario) {
-        alert("Login ou senha inválidos.");
-        return;
-      }
-
-      // Se quiser, depois podemos gravar na sessão:
-      // sessionStorage.setItem("frota18Usuario", JSON.stringify({ login: usuario.login }));
-
-      window.location.href = destino;
+      const titulo  = card.querySelector(".card-cia-titulo")?.textContent?.trim() || "";
+      abrirModal(destino, titulo);
     });
   });
+
+  btnCancel.addEventListener("click", () => {
+    fecharModal();
+  });
+
+  overlay.addEventListener("click", (e) => {
+    if (e.target === overlay){
+      fecharModal();
+    }
+  });
+
+  form.addEventListener("submit", (e) => {
+    e.preventDefault();
+    if (!destinoModulo){
+      msgErro.textContent = "Nenhum painel selecionado.";
+      return;
+    }
+    if (!moduloAlvo){
+      msgErro.textContent = "Painel desconhecido.";
+      return;
+    }
+
+    const login = inputUser.value.trim();
+    const senha = inputPass.value.trim();
+
+    if (!login || !senha){
+      msgErro.textContent = "Informe login e senha.";
+      return;
+    }
+
+    const usuario = usuariosAutorizados.find(u =>
+      u.login.toLowerCase() === login.toLowerCase() &&
+      u.senha === senha
+    );
+
+    if (!usuario){
+      msgErro.textContent = "Login ou senha inválidos.";
+      return;
+    }
+
+    if (usuario.modulos && !usuario.modulos.includes(moduloAlvo)){
+      msgErro.textContent = "Seu usuário não possui acesso a este painel.";
+      return;
+    }
+
+    // Se quiser no futuro:
+    // sessionStorage.setItem("frota18Usuario", JSON.stringify({ login: usuario.login, modulos: usuario.modulos }));
+
+    window.location.href = destinoModulo;
+  });
 </script>
+
 
 </body>
 </html>
