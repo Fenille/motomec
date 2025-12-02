@@ -435,7 +435,7 @@
       <span>Sistema Online · Uso Interno</span>
     </div>
     <div class="auth-box">
-      <div id="infoUsuario">Modo visualização (não logado).</div>
+      <div id="infoUsuario">Modo visualização (não logado). Apenas leitura.</div>
       <form class="login-form" id="formLogin">
         <input id="loginUser" placeholder="Login" autocomplete="off">
         <input id="loginPass" type="password" placeholder="Senha">
@@ -460,6 +460,7 @@
       </div>
 
       <div class="filtros">
+        
         <div class="campo">
           <label for="filtroMunicipio">Município</label>
           <select id="filtroMunicipio">
@@ -484,6 +485,7 @@
         <table>
           <thead>
             <tr>
+              
               <th>Município</th>
               <th>Programa</th>
               <th>Prefixo</th>
@@ -657,24 +659,24 @@
   </section>
 </main>
 
-<!-- FIREBASE + LÓGICA -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
-  import {
-    getDatabase, ref, set, push, onValue
-  } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-database.js";
+  import { getDatabase, ref, set, push, onValue } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-database.js";
   import { usuariosAutorizados } from "./logins.js";
+    const CIA_ID = "3CIA";
 
-  // *** ATENÇÃO: preenchar com os dados REAIS do projeto frota18-a985c ***
+  
   const firebaseConfig = {
-    apiKey: "SUA_API_KEY_AQUI",
-    authDomain: "frota18-a985c.firebaseapp.com",
-    databaseURL: "https://frota18-a985c-default-rtdb.firebaseio.com/",
-    projectId: "frota18-a985c",
-    storageBucket: "frota18-a985c.appspot.com",
-    messagingSenderId: "SEU_SENDER_ID_AQUI",
-    appId: "SEU_APP_ID_AQUI"
+    apiKey: "AIzaSyBY5A_qTttsnEgocAvPMQWkZIFL3Pf17Ss",
+    authDomain: "gestaoviaturas-daf3e.firebaseapp.com",
+    projectId: "gestaoviaturas-daf3e",
+    storageBucket: "gestaoviaturas-daf3e.firebasestorage.app",
+    messagingSenderId: "120947990174",
+    appId: "1:120947990174:web:c02805ea916c62f950e58f",
+    measurementId: "G-9SP9K5H0HE",
+    databaseURL: "https://gestaoviaturas-daf3e-default-rtdb.firebaseio.com/"
   };
+
 
   const app = initializeApp(firebaseConfig);
   const db  = getDatabase(app);
@@ -687,13 +689,11 @@
   const loginPass   = document.getElementById("loginPass");
   const btnLogout   = document.getElementById("btnLogout");
 
-  // ===== VARIÁVEIS =====
   let viaturas = [];
   let manutencoes = [];
   let viaturaSelecionada = null;
   let viaturaEmEdicaoId = null;
 
-  // ===== ELEMENTOS =====
   const tabelaFrota     = document.getElementById("tabelaFrota");
   const filtroMunicipio = document.getElementById("filtroMunicipio");
   const filtroSituacao  = document.getElementById("filtroSituacao");
@@ -702,6 +702,7 @@
   const totOperando     = document.getElementById("totOperando");
   const totBaixadas     = document.getElementById("totBaixadas");
   const statusSistema   = document.getElementById("statusSistema");
+  const filtroCia       = document.getElementById("filtroCia");
 
   const detPrefixo = document.getElementById("detPrefixo");
   const detInfo    = document.getElementById("detInfo");
@@ -728,7 +729,6 @@
   const v_obs   = document.getElementById("v_obs");
   const btnSubmitViatura = document.getElementById("btnSubmitViatura");
 
-  // Relatórios
   const tipoRelatorio     = document.getElementById("tipoRelatorio");
   const relPrefixo        = document.getElementById("relPrefixo");
   const relDataIni        = document.getElementById("relDataIni");
@@ -742,7 +742,6 @@
   const btnRelCsv         = document.getElementById("btnRelCsv");
   const relResultado      = document.getElementById("relResultado");
 
-  // Elementos restritos (só logado pode mexer)
   const elementosRestritos = [
     ...formManutencao.querySelectorAll("input, select, textarea, button"),
     ...formViatura.querySelectorAll("input, select, textarea, button"),
@@ -791,6 +790,8 @@
   }
 
   function aplicaFiltros(v) {
+    if (filtroCia && filtroCia.value && v.cia !== filtroCia.value) return false;
+    if (true && CIA_ID && v.cia !== CIA_ID) return false;
     if (filtroMunicipio.value && v.municipio !== filtroMunicipio.value) return false;
     if (filtroSituacao.value && v.situacao !== filtroSituacao.value) return false;
     const termo = filtroBusca.value.trim().toLowerCase();
@@ -819,6 +820,7 @@
 
       const tr = document.createElement("tr");
       tr.innerHTML = `
+        
         <td>${v.municipio || ""}</td>
         <td>${v.programa || ""}</td>
         <td>${v.prefixo || ""}</td>
@@ -849,7 +851,8 @@
     detPrefixo.textContent = viaturaSelecionada.prefixo || "Sem prefixo";
     const infoPlaca = viaturaSelecionada.placa ? ` • Placa ${viaturaSelecionada.placa}` : "";
     const infoModelo = viaturaSelecionada.modelo ? ` • Modelo ${viaturaSelecionada.modelo}` : "";
-    detInfo.textContent    = `${viaturaSelecionada.programa || ""} • ${viaturaSelecionada.municipio || ""}${infoPlaca}${infoModelo}`;
+    const infoCia = viaturaSelecionada.cia ? ` • ${viaturaSelecionada.cia}` : "";
+    detInfo.textContent    = `${viaturaSelecionada.programa || ""} • ${viaturaSelecionada.municipio || ""}${infoPlaca}${infoModelo}${infoCia}`;
     detObs.textContent     = viaturaSelecionada.observacao || "Sem observações";
 
     detStatus.innerHTML = "";
@@ -960,7 +963,9 @@
     const obj = snapshot.val() || {};
     const arr = [];
     for (const [id, v] of Object.entries(obj)) {
-      arr.push({ id, ...v });
+            if (v.cia === "3CIA") {
+        arr.push({ id, ...v });
+      }
     }
     viaturas = arr;
     preencherFiltroMunicipio();
@@ -1057,7 +1062,8 @@
       modelo:     v_modelo.value.trim().toUpperCase(),
       situacao:   v_sit.value,
       observacao: v_obs.value.trim(),
-      ts:         Date.now()
+      ts:         Date.now(),
+      cia: CIA_ID
     };
 
     if (!payload.municipio || !payload.programa || !payload.prefixo) {
@@ -1158,6 +1164,7 @@
   });
 
   [filtroMunicipio, filtroSituacao].forEach(el => el.addEventListener("change", renderTabela));
+  if (filtroCia) filtroCia.addEventListener("change", renderTabela);
   filtroBusca.addEventListener("input", renderTabela);
 
   tipoRelatorio.addEventListener("change", () => {
