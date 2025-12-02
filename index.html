@@ -163,6 +163,96 @@
         padding-top:18px;
       }
     }
+  
+    /* ===== MODAL DE LOGIN ===== */
+    .login-overlay{
+      position:fixed;
+      inset:0;
+      background:rgba(0,0,0,0.78);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      z-index:999;
+      backdrop-filter:blur(4px);
+    }
+    .login-overlay.hidden{
+      display:none;
+    }
+    .login-modal{
+      background:var(--card-bg);
+      border-radius:18px;
+      box-shadow:var(--shadow);
+      border:1px solid rgba(255,255,255,0.2);
+      padding:18px 18px 14px;
+      width:100%;
+      max-width:320px;
+    }
+    .login-modal-titulo{
+      font-size:1rem;
+      text-transform:uppercase;
+      letter-spacing:0.12em;
+      margin-bottom:6px;
+    }
+    .login-modal-sub{
+      font-size:0.78rem;
+      color:var(--cinza);
+      margin-bottom:10px;
+    }
+    .login-modal-form{
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+    }
+    .login-modal-form label{
+      font-size:0.7rem;
+      text-transform:uppercase;
+      letter-spacing:0.1em;
+      color:var(--cinza);
+    }
+    .login-modal-form input{
+      width:100%;
+      padding:6px 10px;
+      font-size:0.8rem;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,0.25);
+      background:#050509;
+      color:var(--amarelo);
+      outline:none;
+    }
+    .login-modal-actions{
+      display:flex;
+      justify-content:flex-end;
+      gap:6px;
+      margin-top:8px;
+    }
+    .btn-login-primary,
+    .btn-login-cancel{
+      border:none;
+      border-radius:999px;
+      padding:6px 14px;
+      font-size:0.78rem;
+      text-transform:uppercase;
+      letter-spacing:0.11em;
+      cursor:pointer;
+    }
+    .btn-login-primary{
+      background:linear-gradient(135deg,var(--amarelo-neon),var(--amarelo));
+      color:#000;
+      font-weight:600;
+      box-shadow:0 0 12px rgba(255,255,120,0.6);
+    }
+    .btn-login-cancel{
+      background:rgba(0,0,0,0.8);
+      color:var(--cinza);
+      border:1px solid rgba(255,255,255,0.25);
+    }
+    .login-erro{
+      font-size:0.72rem;
+      color:#ff8080;
+      margin-top:2px;
+      min-height:1em;
+    }
+
   </style>
 </head>
 <body>
@@ -237,37 +327,104 @@
   </div>
 </main>
 
+
+<div id="loginOverlay" class="login-overlay hidden">
+  <div class="login-modal">
+    <div class="login-modal-titulo">Acesso restrito</div>
+    <div class="login-modal-sub">Informe seu login e senha para abrir o painel selecionado.</div>
+    <form id="loginForm" class="login-modal-form">
+      <div>
+        <label for="loginUserModal">Login</label>
+        <input id="loginUserModal" autocomplete="off" />
+      </div>
+      <div>
+        <label for="loginPassModal">Senha</label>
+        <input id="loginPassModal" type="password" />
+      </div>
+      <div class="login-erro" id="loginErro"></div>
+      <div class="login-modal-actions">
+        <button type="button" class="btn-login-cancel" id="btnLoginCancel">Cancelar</button>
+        <button type="submit" class="btn-login-primary">Entrar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+
+
 <script type="module">
   import { usuariosAutorizados } from "./logins.js";
+
+  const overlay   = document.getElementById("loginOverlay");
+  const form      = document.getElementById("loginForm");
+  const inputUser = document.getElementById("loginUserModal");
+  const inputPass = document.getElementById("loginPassModal");
+  const msgErro   = document.getElementById("loginErro");
+  const btnCancel = document.getElementById("btnLoginCancel");
+
+  let destinoModulo = null;
+
+  function abrirModal(destino){
+    destinoModulo = destino;
+    msgErro.textContent = "";
+    inputUser.value = "";
+    inputPass.value = "";
+    overlay.classList.remove("hidden");
+    inputUser.focus();
+  }
+
+  function fecharModal(){
+    overlay.classList.add("hidden");
+    destinoModulo = null;
+  }
 
   document.querySelectorAll(".card-cia").forEach(card => {
     card.addEventListener("click", () => {
       const destino = card.getAttribute("data-target");
       if (!destino) return;
-
-      const login = prompt("Login:");
-      if (!login) return;
-
-      const senha = prompt("Senha:");
-      if (!senha) return;
-
-      const usuario = usuariosAutorizados.find(u =>
-        u.login.toLowerCase() === login.toLowerCase() &&
-        u.senha === senha
-      );
-
-      if (!usuario) {
-        alert("Login ou senha inválidos.");
-        return;
-      }
-
-      // Se quiser, depois podemos gravar na sessão:
-      // sessionStorage.setItem("frota18Usuario", JSON.stringify({ login: usuario.login }));
-
-      window.location.href = destino;
+      abrirModal(destino);
     });
   });
+
+  btnCancel.addEventListener("click", () => {
+    fecharModal();
+  });
+
+  overlay.addEventListener("click", (e) => {
+    if (e.target === overlay){
+      fecharModal();
+    }
+  });
+
+  form.addEventListener("submit", (e) => {
+    e.preventDefault();
+    if (!destinoModulo) return;
+
+    const login = inputUser.value.trim();
+    const senha = inputPass.value.trim();
+
+    if (!login || !senha){
+      msgErro.textContent = "Informe login e senha.";
+      return;
+    }
+
+    const usuario = usuariosAutorizados.find(u =>
+      u.login.toLowerCase() === login.toLowerCase() &&
+      u.senha === senha
+    );
+
+    if (!usuario){
+      msgErro.textContent = "Login ou senha inválidos.";
+      return;
+    }
+
+    // Futuro: poderíamos gravar na sessão se quiser controlar permissões nos módulos
+    // sessionStorage.setItem("frota18Usuario", JSON.stringify({ login: usuario.login }));
+
+    window.location.href = destinoModulo;
+  });
 </script>
+
 
 </body>
 </html>
