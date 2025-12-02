@@ -1,6 +1,4 @@
-// Arquivo separado apenas com logins e senhas locais
-// IMPORTANTE: isto não é autenticação segura, é apenas controle interno da página.
-
+// logins.js - controle simples de usuários (apenas lado cliente)
 export const usuariosAutorizados = [
   { login: "Fenille",  senha: "140965" },
   { login: "Previato", senha: "132800" },

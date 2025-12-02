@@ -71,7 +71,6 @@
       background:var(--amarelo-neon);
       box-shadow:0 0 10px var(--amarelo-neon);
     }
-
     .header-right{
       display:flex;
       flex-direction:column;
@@ -102,35 +101,9 @@
       filter:brightness(1.1);
     }
 
-    .auth-box{
-      display:flex;
-      flex-direction:column;
-      gap:4px;
-      align-items:flex-end;
-      font-size:0.75rem;
-      color:var(--cinza);
-    }
-    .login-form{
-      display:flex;
-      gap:4px;
-      align-items:center;
-      flex-wrap:wrap;
-      justify-content:flex-end;
-    }
-    .login-form input{
-      width:120px;
-      padding:4px 8px;
-      font-size:0.72rem;
-      border-radius:999px;
-      border:1px solid rgba(255,255,255,0.25);
-      background:#000;
-      color:var(--amarelo);
-      outline:none;
-    }
-
     main{
       flex:1;
-      display:none; /* só aparece após login */
+      display:flex;
       gap:18px;
       padding:16px;
     }
@@ -395,14 +368,6 @@
       transform:translateY(-1px);
     }
 
-    .login-form button{
-      margin-top:0;
-      padding:4px 10px;
-      font-size:0.72rem;
-      box-shadow:none;
-      align-self:auto;
-    }
-
     .acoes-detalhes{
       margin-top:8px;
       display:flex;
@@ -460,20 +425,10 @@
         <span>Sistema Online · Uso Interno</span>
       </div>
     </div>
-    <div class="auth-box">
-      <div id="infoUsuario">Faça login para acessar este módulo.</div>
-      <form class="login-form" id="formLogin">
-        <input id="loginUser" placeholder="Login" autocomplete="off">
-        <input id="loginPass" type="password" placeholder="Senha">
-        <button type="submit" id="btnLogin">Entrar</button>
-        <button type="button" id="btnLogout" style="display:none;">Sair</button>
-      </form>
-    </div>
   </div>
 </header>
 
 <main>
-  <!-- ESQUERDA: FROTA -->
   <section class="painel-esquerdo">
     <div class="card">
       <div class="card-titulo">
@@ -531,7 +486,6 @@
     </div>
   </section>
 
-  <!-- DIREITA: DETALHES / HISTÓRICO / FORMULÁRIOS / RELATÓRIOS -->
   <section class="painel-direito">
 
     <div class="card">
@@ -688,8 +642,6 @@
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
   import { getDatabase, ref, set, push, onValue } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-database.js";
-  import { usuariosAutorizados } from "./logins.js";
-    const CIA_ID = "FT";
 
   
   const firebaseConfig = {
@@ -704,24 +656,18 @@
   };
 
 
+  const CIA_ID = "FT";
+  const IS_BTL = false;
+
   const app = initializeApp(firebaseConfig);
   const db  = getDatabase(app);
 
-  const mainEl = document.querySelector("main");
   const btnVoltar = document.getElementById("btnVoltar");
   if (btnVoltar) {
     btnVoltar.addEventListener("click", () => {
       window.location.href = "index.html";
     });
   }
-
-  let usuarioLogado = null;
-
-  const infoUsuario = document.getElementById("infoUsuario");
-  const formLogin   = document.getElementById("formLogin");
-  const loginUser   = document.getElementById("loginUser");
-  const loginPass   = document.getElementById("loginPass");
-  const btnLogout   = document.getElementById("btnLogout");
 
   let viaturas = [];
   let manutencoes = [];
@@ -732,11 +678,11 @@
   const filtroMunicipio = document.getElementById("filtroMunicipio");
   const filtroSituacao  = document.getElementById("filtroSituacao");
   const filtroBusca     = document.getElementById("filtroBusca");
+  const filtroCia       = document.getElementById("filtroCia");
   const totViaturas     = document.getElementById("totViaturas");
   const totOperando     = document.getElementById("totOperando");
   const totBaixadas     = document.getElementById("totBaixadas");
   const statusSistema   = document.getElementById("statusSistema");
-  const filtroCia       = document.getElementById("filtroCia");
 
   const detPrefixo = document.getElementById("detPrefixo");
   const detInfo    = document.getElementById("detInfo");
@@ -775,13 +721,6 @@
   const btnRelTela        = document.getElementById("btnRelTela");
   const btnRelCsv         = document.getElementById("btnRelCsv");
   const relResultado      = document.getElementById("relResultado");
-
-  const elementosRestritos = [
-    ...formManutencao.querySelectorAll("input, select, textarea, button"),
-    ...formViatura.querySelectorAll("input, select, textarea, button"),
-    btnExcluirViatura,
-    btnEditarViatura
-  ];
 
   function formataDataBr(iso) {
     if (!iso) return "";
@@ -824,8 +763,8 @@
   }
 
   function aplicaFiltros(v) {
-    if (filtroCia && filtroCia.value && v.cia !== filtroCia.value) return false;
-    if (true && CIA_ID && v.cia !== CIA_ID) return false;
+    if (!IS_BTL && CIA_ID && v.cia !== CIA_ID) return false;
+    if (IS_BTL && filtroCia && filtroCia.value && v.cia !== filtroCia.value) return false;
     if (filtroMunicipio.value && v.municipio !== filtroMunicipio.value) return false;
     if (filtroSituacao.value && v.situacao !== filtroSituacao.value) return false;
     const termo = filtroBusca.value.trim().toLowerCase();
@@ -935,76 +874,11 @@
     });
   }
 
-  function atualizarPermissoes() {
-    const podeEditar = !!usuarioLogado;
-
-    if (mainEl) {
-      mainEl.style.display = podeEditar ? "flex" : "none";
-    }
-
-    elementosRestritos.forEach(el => {
-      if (!el) return;
-      if (el.tagName === "BUTTON") {
-        el.disabled = !podeEditar;
-        if (!podeEditar) el.classList.add("btn-disabled");
-        else el.classList.remove("btn-disabled");
-      } else {
-        if (el.tagName === "SELECT") {
-          el.disabled = !podeEditar;
-        } else if (el.tagName === "INPUT" || el.tagName === "TEXTAREA") {
-          el.readOnly = !podeEditar;
-        }
-        if (!podeEditar) el.classList.add("ctrl-disabled");
-        else el.classList.remove("ctrl-disabled");
-      }
-    });
-
-    if (usuarioLogado) {
-      infoUsuario.textContent = `Logado como ${usuarioLogado.login} (acesso liberado ao módulo).`;
-      btnLogout.style.display = "inline-block";
-    } else {
-      infoUsuario.textContent = "Faça login para acessar este módulo.";
-      btnLogout.style.display = "none";
-    }
-  }
-
-  formLogin.addEventListener("submit", (e) => {
-    e.preventDefault();
-    const loginDigitado = loginUser.value.trim();
-    const senhaDigitada = loginPass.value.trim();
-
-    if (!loginDigitado || !senhaDigitada) {
-      alert("Informe login e senha.");
-      return;
-    }
-
-    const usuario = usuariosAutorizados.find(u =>
-      u.login.toLowerCase() === loginDigitado.toLowerCase() &&
-      u.senha === senhaDigitada
-    );
-
-    if (!usuario) {
-      alert("Login ou senha inválidos.");
-      return;
-    }
-
-    usuarioLogado = { login: usuario.login };
-    loginPass.value = "";
-    atualizarPermissoes();
-  });
-
-  btnLogout.addEventListener("click", () => {
-    usuarioLogado = null;
-    atualizarPermissoes();
-  });
-
   onValue(ref(db, "viaturas"), (snapshot) => {
     const obj = snapshot.val() || {};
     const arr = [];
     for (const [id, v] of Object.entries(obj)) {
-            if (v.cia === "FT") {
-        arr.push({ id, ...v });
-      }
+      arr.push({ id, ...v });
     }
     viaturas = arr;
     preencherFiltroMunicipio();
@@ -1047,11 +921,6 @@
   formManutencao.addEventListener("submit", async (e) => {
     e.preventDefault();
 
-    if (!usuarioLogado) {
-      alert("Apenas usuários logados podem lançar manutenções.");
-      return;
-    }
-
     if (!viaturaSelecionada) {
       alert("Selecione uma viatura na tabela antes de lançar a manutenção.");
       return;
@@ -1088,11 +957,6 @@
   formViatura.addEventListener("submit", async (e) => {
     e.preventDefault();
 
-    if (!usuarioLogado) {
-      alert("Apenas usuários logados podem cadastrar ou editar viaturas.");
-      return;
-    }
-
     const payload = {
       municipio:  v_mun.value.trim(),
       programa:   v_prog.value.trim(),
@@ -1102,7 +966,7 @@
       situacao:   v_sit.value,
       observacao: v_obs.value.trim(),
       ts:         Date.now(),
-      cia: CIA_ID
+      cia:        CIA_ID
     };
 
     if (!payload.municipio || !payload.programa || !payload.prefixo) {
@@ -1136,10 +1000,6 @@
   });
 
   btnEditarViatura.addEventListener("click", () => {
-    if (!usuarioLogado) {
-      alert("Apenas usuários logados podem editar viaturas.");
-      return;
-    }
     if (!viaturaSelecionada) {
       alert("Selecione uma viatura na tabela para editar.");
       return;
@@ -1160,10 +1020,6 @@
   });
 
   btnExcluirViatura.addEventListener("click", async () => {
-    if (!usuarioLogado) {
-      alert("Apenas usuários logados podem excluir viaturas.");
-      return;
-    }
     if (!viaturaSelecionada) {
       alert("Selecione uma viatura para excluir.");
       return;
@@ -1370,8 +1226,6 @@
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
   });
-
-  atualizarPermissoes();
 </script>
 
 </body>
