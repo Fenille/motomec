@@ -164,95 +164,105 @@
       }
     }
   
-    /* ===== MODAL DE LOGIN ===== */
+    /* ===== MODAL DE LOGIN (TELA CHEIA) ===== */
     .login-overlay{
       position:fixed;
       inset:0;
-      background:rgba(0,0,0,0.78);
+      background:rgba(0,0,0,0.82);
       display:flex;
       align-items:center;
       justify-content:center;
       z-index:999;
-      backdrop-filter:blur(4px);
+      backdrop-filter:blur(5px);
     }
     .login-overlay.hidden{
       display:none;
     }
     .login-modal{
       background:var(--card-bg);
-      border-radius:18px;
-      box-shadow:var(--shadow);
-      border:1px solid rgba(255,255,255,0.2);
-      padding:18px 18px 14px;
+      border-radius:22px;
+      box-shadow:0 26px 70px rgba(0,0,0,0.95);
+      border:1px solid rgba(255,255,255,0.25);
+      padding:22px 22px 18px;
       width:100%;
-      max-width:320px;
+      max-width:360px;
     }
     .login-modal-titulo{
-      font-size:1rem;
+      font-size:1.1rem;
       text-transform:uppercase;
-      letter-spacing:0.12em;
+      letter-spacing:0.16em;
       margin-bottom:6px;
     }
     .login-modal-sub{
-      font-size:0.78rem;
+      font-size:0.8rem;
       color:var(--cinza);
-      margin-bottom:10px;
+      margin-bottom:12px;
     }
     .login-modal-form{
       display:flex;
       flex-direction:column;
-      gap:8px;
+      gap:10px;
     }
     .login-modal-form label{
       font-size:0.7rem;
       text-transform:uppercase;
-      letter-spacing:0.1em;
+      letter-spacing:0.11em;
       color:var(--cinza);
+      margin-bottom:2px;
     }
     .login-modal-form input{
       width:100%;
-      padding:6px 10px;
-      font-size:0.8rem;
+      padding:7px 11px;
+      font-size:0.86rem;
       border-radius:999px;
-      border:1px solid rgba(255,255,255,0.25);
+      border:1px solid rgba(255,255,255,0.3);
       background:#050509;
       color:var(--amarelo);
       outline:none;
     }
+    .login-modal-form input:focus{
+      border-color:var(--amarelo-neon);
+      box-shadow:0 0 0 1px rgba(255,255,120,0.5);
+    }
     .login-modal-actions{
       display:flex;
       justify-content:flex-end;
-      gap:6px;
-      margin-top:8px;
+      gap:8px;
+      margin-top:10px;
     }
     .btn-login-primary,
     .btn-login-cancel{
       border:none;
       border-radius:999px;
-      padding:6px 14px;
-      font-size:0.78rem;
+      padding:6px 16px;
+      font-size:0.8rem;
       text-transform:uppercase;
-      letter-spacing:0.11em;
+      letter-spacing:0.14em;
       cursor:pointer;
     }
     .btn-login-primary{
       background:linear-gradient(135deg,var(--amarelo-neon),var(--amarelo));
       color:#000;
       font-weight:600;
-      box-shadow:0 0 12px rgba(255,255,120,0.6);
+      box-shadow:0 0 16px rgba(255,255,120,0.65);
     }
     .btn-login-cancel{
-      background:rgba(0,0,0,0.8);
+      background:rgba(0,0,0,0.9);
       color:var(--cinza);
-      border:1px solid rgba(255,255,255,0.25);
+      border:1px solid rgba(255,255,255,0.3);
     }
     .login-erro{
-      font-size:0.72rem;
+      font-size:0.75rem;
       color:#ff8080;
+      min-height:1.1em;
       margin-top:2px;
-      min-height:1em;
     }
-
+    .login-alvo{
+      font-size:0.75rem;
+      color:var(--cinza);
+      margin-bottom:4px;
+    }
+    
   </style>
 </head>
 <body>
@@ -278,7 +288,7 @@
       <div class="card-cia" data-target="frota_cia1.html">
         <div class="card-cia-titulo">1ª Cia PM</div>
         <div class="card-cia-sub">Painel de gestão de frota da 1ª Companhia.</div>
-        <span class="card-cia-tag">Área urbana de Adamantina</span>
+        <span class="card-cia-tag">Presidente Prudente</span>
         <div class="card-cia-footer">Clique para abrir o painel da 1ª Cia.</div>
       </div>
 
@@ -292,28 +302,28 @@
       <div class="card-cia" data-target="frota_cia3.html">
         <div class="card-cia-titulo">3ª Cia PM</div>
         <div class="card-cia-sub">Painel de gestão de frota da 3ª Companhia.</div>
-        <span class="card-cia-tag">Flórida Paulista / Pacaembu</span>
+        <span class="card-cia-tag">Pirapozinho e região</span>
         <div class="card-cia-footer">Clique para abrir o painel da 3ª Cia.</div>
       </div>
 
       <div class="card-cia" data-target="frota_cia4.html">
         <div class="card-cia-titulo">4ª Cia PM</div>
         <div class="card-cia-sub">Painel de gestão de frota da 4ª Companhia.</div>
-        <span class="card-cia-tag">Lucélia e região</span>
+        <span class="card-cia-tag">Álvares Machado e região</span>
         <div class="card-cia-footer">Clique para abrir o painel da 4ª Cia.</div>
       </div>
 
       <div class="card-cia" data-target="frota_cia5.html">
         <div class="card-cia-titulo">5ª Cia PM</div>
         <div class="card-cia-sub">Painel de gestão de frota da 5ª Companhia.</div>
-        <span class="card-cia-tag">Osvaldo Cruz e região</span>
+        <span class="card-cia-tag">Presidente Prudente</span>
         <div class="card-cia-footer">Clique para abrir o painel da 5ª Cia.</div>
       </div>
 
       <div class="card-cia" data-target="frota_cia_ft.html">
         <div class="card-cia-titulo">Cia FT</div>
         <div class="card-cia-sub">Painel de gestão de frota da Força Tática.</div>
-        <span class="card-cia-tag">Atuação em toda a área do Batalhão</span>
+        <span class="card-cia-tag">Atuação em toda a região do 18º BPM/I</span>
         <div class="card-cia-footer">Clique para abrir o painel da Cia FT.</div>
       </div>
 
@@ -331,7 +341,8 @@
 <div id="loginOverlay" class="login-overlay hidden">
   <div class="login-modal">
     <div class="login-modal-titulo">Acesso restrito</div>
-    <div class="login-modal-sub">Informe seu login e senha para abrir o painel selecionado.</div>
+    <div class="login-modal-sub">Informe login e senha para abrir o painel selecionado.</div>
+    <div class="login-alvo" id="loginAlvo"></div>
     <form id="loginForm" class="login-modal-form">
       <div>
         <label for="loginUserModal">Login</label>
@@ -351,80 +362,37 @@
 </div>
 
 
-
 <script type="module">
   import { usuariosAutorizados } from "./logins.js";
-
-  const overlay   = document.getElementById("loginOverlay");
-  const form      = document.getElementById("loginForm");
-  const inputUser = document.getElementById("loginUserModal");
-  const inputPass = document.getElementById("loginPassModal");
-  const msgErro   = document.getElementById("loginErro");
-  const btnCancel = document.getElementById("btnLoginCancel");
-
-  let destinoModulo = null;
-
-  function abrirModal(destino){
-    destinoModulo = destino;
-    msgErro.textContent = "";
-    inputUser.value = "";
-    inputPass.value = "";
-    overlay.classList.remove("hidden");
-    inputUser.focus();
-  }
-
-  function fecharModal(){
-    overlay.classList.add("hidden");
-    destinoModulo = null;
-  }
 
   document.querySelectorAll(".card-cia").forEach(card => {
     card.addEventListener("click", () => {
       const destino = card.getAttribute("data-target");
       if (!destino) return;
-      abrirModal(destino);
+
+      const login = prompt("Login:");
+      if (!login) return;
+
+      const senha = prompt("Senha:");
+      if (!senha) return;
+
+      const usuario = usuariosAutorizados.find(u =>
+        u.login.toLowerCase() === login.toLowerCase() &&
+        u.senha === senha
+      );
+
+      if (!usuario) {
+        alert("Login ou senha inválidos.");
+        return;
+      }
+
+      // Se quiser, depois podemos gravar na sessão:
+      // sessionStorage.setItem("frota18Usuario", JSON.stringify({ login: usuario.login }));
+
+      window.location.href = destino;
     });
   });
-
-  btnCancel.addEventListener("click", () => {
-    fecharModal();
-  });
-
-  overlay.addEventListener("click", (e) => {
-    if (e.target === overlay){
-      fecharModal();
-    }
-  });
-
-  form.addEventListener("submit", (e) => {
-    e.preventDefault();
-    if (!destinoModulo) return;
-
-    const login = inputUser.value.trim();
-    const senha = inputPass.value.trim();
-
-    if (!login || !senha){
-      msgErro.textContent = "Informe login e senha.";
-      return;
-    }
-
-    const usuario = usuariosAutorizados.find(u =>
-      u.login.toLowerCase() === login.toLowerCase() &&
-      u.senha === senha
-    );
-
-    if (!usuario){
-      msgErro.textContent = "Login ou senha inválidos.";
-      return;
-    }
-
-    // Futuro: poderíamos gravar na sessão se quiser controlar permissões nos módulos
-    // sessionStorage.setItem("frota18Usuario", JSON.stringify({ login: usuario.login }));
-
-    window.location.href = destinoModulo;
-  });
 </script>
-
 
 </body>
 </html>
