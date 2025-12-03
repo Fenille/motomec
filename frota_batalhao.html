@@ -1004,6 +1004,15 @@
       dataBaixa:  v_data_baixa.value
     };
 
+    if (payload.situacao === "BAIXADA" && !payload.dataBaixa) {
+      alert("Informe a data de baixa da viatura.");
+      return;
+    }
+    if (payload.situacao !== "BAIXADA") {
+      payload.dataBaixa = "";
+    }
+
+
     if (!payload.municipio || !payload.programa || !payload.prefixo) {
       alert("Preencha Município, Programa e Prefixo.");
       return;
