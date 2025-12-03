@@ -473,6 +473,8 @@
               <th>Placa</th>
               <th>Modelo</th>
               <th>Situação</th>
+              <th>Data baixa</th>
+              <th>Dias baixada</th>
               <th>Observação</th>
             </tr>
           </thead>
@@ -591,6 +593,10 @@
             <label>Observação</label>
             <input id="v_obs" placeholder="Ex.: RP MARTINOPOLIS/DELEGADA">
           </div>
+          <div class="campo">
+            <label>Data baixa (se baixada)</label>
+            <input id="v_data_baixa" type="date">
+          </div>
         </div>
         <button type="submit" id="btnSubmitViatura">Cadastrar viatura</button>
       </form>
@@ -707,6 +713,7 @@
   const v_modelo = document.getElementById("v_modelo");
   const v_sit   = document.getElementById("v_sit");
   const v_obs   = document.getElementById("v_obs");
+  const v_data_baixa = document.getElementById("v_data_baixa");
   const btnSubmitViatura = document.getElementById("btnSubmitViatura");
 
   const tipoRelatorio     = document.getElementById("tipoRelatorio");
@@ -726,6 +733,17 @@
     if (!iso) return "";
     const [y,m,d] = iso.split("-");
     return `${d}/${m}/${y}`;
+  }
+
+  function diasDesdeBaixa(iso) {
+    if (!iso) return "";
+    const hoje = new Date();
+    const [y, m, d] = iso.split("-").map(Number);
+    const baixa = new Date(y, m - 1, d);
+    const diffMs = hoje - baixa;
+    if (Number.isNaN(diffMs) || diffMs < 0) return "";
+    const dias = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+    return dias + (dias === 1 ? " dia" : " dias");
   }
 
   function preencherFiltroMunicipio() {
@@ -804,6 +822,8 @@
             ${v.situacao || ""}
           </span>
         </td>
+        <td>${v.dataBaixa ? formataDataBr(v.dataBaixa) : ""}</td>
+        <td>${v.situacao === "BAIXADA" && v.dataBaixa ? diasDesdeBaixa(v.dataBaixa) : ""}</td>
         <td>${v.observacao || ""}</td>
       `;
       tr.addEventListener("click", () => selecionarViatura(v.id));
@@ -966,7 +986,8 @@
       situacao:   v_sit.value,
       observacao: v_obs.value.trim(),
       ts:         Date.now(),
-      cia:        CIA_ID
+      cia:        CIA_ID,
+      dataBaixa:  v_data_baixa.value
     };
 
     if (!payload.municipio || !payload.programa || !payload.prefixo) {
@@ -990,6 +1011,7 @@
       v_placa.value = "";
       v_modelo.value = "";
       v_obs.value = "";
+      v_data_baixa.value = "";
       v_sit.value = "OPERANDO";
       viaturaEmEdicaoId = null;
       btnSubmitViatura.textContent = "Cadastrar viatura";
@@ -1013,6 +1035,7 @@
     v_modelo.value = viaturaSelecionada.modelo || "";
     v_sit.value   = viaturaSelecionada.situacao || "OPERANDO";
     v_obs.value   = viaturaSelecionada.observacao || "";
+    v_data_baixa.value = viaturaSelecionada.dataBaixa || "";
 
     btnSubmitViatura.textContent = "Salvar alterações";
 
