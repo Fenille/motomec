@@ -559,7 +559,7 @@
         <div class="linha">
           <div class="campo">
             <label>Município</label>
-            <input id="v_mun" required placeholder="Ex.: Martinópolis">
+            <select id="v_mun" required></select>
           </div>
           <div class="campo">
             <label>Programa</label>
@@ -665,6 +665,7 @@
 
   const CIA_ID = "2CIA";
   const IS_BTL = false;
+  const MUNICIPIOS_CIA = ["Martinópolis", "Rancharia", "Caiabu", "Indiana", "Taciba", "Nantes", "Iepê", "João Ramalho"];
 
   const app = initializeApp(firebaseConfig);
   const db  = getDatabase(app);
@@ -708,6 +709,13 @@
 
   const formViatura = document.getElementById("formViatura");
   const v_mun   = document.getElementById("v_mun");
+  function preencherMunicipiosCadastro(){
+    const atual=v_mun.value;
+    v_mun.innerHTML='<option value="">Selecione</option>';
+    MUNICIPIOS_CIA.forEach(m=>{const o=document.createElement("option");o.value=m;o.textContent=m;v_mun.appendChild(o)});
+    if(MUNICIPIOS_CIA.includes(atual)) v_mun.value=atual;
+  }
+  preencherMunicipiosCadastro();
   const v_prog  = document.getElementById("v_prog");
   const v_pref  = document.getElementById("v_pref");
   const v_placa = document.getElementById("v_placa");
