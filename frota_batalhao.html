@@ -101,6 +101,10 @@
       filter:brightness(1.1);
     }
 
+    .auth-box{display:flex;flex-direction:column;gap:4px;align-items:flex-end;font-size:.75rem;color:var(--cinza)}
+    .login-form{display:flex;gap:4px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
+    .login-form input{width:120px;padding:4px 8px;font-size:.72rem;border-radius:999px;border:1px solid rgba(255,255,255,.25);background:#000;color:var(--amarelo);outline:none}
+    .ctrl-disabled{opacity:.55}.btn-disabled{opacity:.45;cursor:not-allowed}
     main{
       flex:1;
       display:flex;
@@ -425,6 +429,15 @@
         <span>Sistema Online · Uso Interno</span>
       </div>
     </div>
+    <div class="auth-box">
+      <div id="infoUsuario">Modo visualização (não logado). Apenas leitura.</div>
+      <form class="login-form" id="formLogin">
+        <input id="loginUser" placeholder="Login" autocomplete="off">
+        <input id="loginPass" type="password" placeholder="Senha">
+        <button type="submit">Entrar</button>
+        <button type="button" id="btnLogout" style="display:none;">Sair</button>
+      </form>
+    </div>
   </div>
 </header>
 
@@ -680,8 +693,17 @@
   const CIA_ID = null;
   const IS_BTL = true;
 
-  const app = initializeApp(firebaseConfig);
+  const app = initializeApp(firebaseConfig, "btl");
   const db  = getDatabase(app);
+
+  // Banco oficial da 2ª Cia: leitura direta, sem duplicar cadastros no BTL.
+  const firebaseConfig2Cia = { ...firebaseConfig, databaseURL: "https://gestaoviaturas-daf3e-default-rtdb.firebaseio.com/" };
+  const app2Cia = initializeApp(firebaseConfig2Cia, "cia2");
+  const db2Cia = getDatabase(app2Cia);
+
+  const usuariosAutorizados=[{login:"Fenille",senha:"140965"},{login:"Previato",senha:"132800"},{login:"Gleison",senha:"133069"},{login:"Melo",senha:"991315"}];
+  const usuarioSessao=sessionStorage.getItem("frotaUsuario");
+  let usuarioLogado=usuariosAutorizados.some(u=>u.login===usuarioSessao)?{login:usuarioSessao}:null;
 
   const btnVoltar = document.getElementById("btnVoltar");
   if (btnVoltar) {
@@ -743,6 +765,24 @@
   const btnRelTela        = document.getElementById("btnRelTela");
   const btnRelCsv         = document.getElementById("btnRelCsv");
   const relResultado      = document.getElementById("relResultado");
+  const infoUsuario=document.getElementById("infoUsuario");
+  const formLogin=document.getElementById("formLogin");
+  const loginUser=document.getElementById("loginUser");
+  const loginPass=document.getElementById("loginPass");
+  const btnLogout=document.getElementById("btnLogout");
+  let viaturasBtl=[], viaturas2Cia=[], manutencoesBtl=[], manutencoes2Cia=[];
+
+  function bancoDaViatura(v){ return v?.source === "2cia" ? db2Cia : db; }
+  function atualizarPermissoes(){
+    const pode=!!usuarioLogado;
+    [...formViatura.querySelectorAll("input,select,textarea,button"),...formManutencao.querySelectorAll("input,select,textarea,button"),btnEditarViatura,btnExcluirViatura].forEach(el=>{
+      if(!el)return; el.disabled=!pode; el.classList.toggle(el.tagName==="BUTTON"?"btn-disabled":"ctrl-disabled",!pode);
+    });
+    infoUsuario.textContent=pode?`Logado como ${usuarioLogado.login} (edição liberada).`:"Modo visualização (não logado). Apenas leitura.";
+    btnLogout.style.display=pode?"inline-block":"none";
+  }
+  formLogin.addEventListener("submit",e=>{e.preventDefault();const u=loginUser.value.trim(),p=loginPass.value.trim();const achou=usuariosAutorizados.find(x=>x.login.toLowerCase()===u.toLowerCase()&&x.senha===p);if(!achou){alert("Login ou senha inválidos.");return}usuarioLogado={login:achou.login};sessionStorage.setItem("frotaUsuario",achou.login);loginPass.value="";atualizarPermissoes()});
+  btnLogout.addEventListener("click",()=>{usuarioLogado=null;sessionStorage.removeItem("frotaUsuario");atualizarPermissoes()});
 
   function formataDataBr(iso) {
     if (!iso) return "";
@@ -841,7 +881,7 @@
         <td>${v.situacao === "BAIXADA" && v.dataBaixa ? diasDesdeBaixa(v.dataBaixa) : ""}</td>
         <td>${v.observacao || ""}</td>
       `;
-      tr.addEventListener("click", () => selecionarViatura(v.id));
+      tr.addEventListener("click", () => selecionarViatura(v.uid || v.id));
       tabelaFrota.appendChild(tr);
     });
 
@@ -853,7 +893,7 @@
   }
 
   function selecionarViatura(id) {
-    viaturaSelecionada = viaturas.find(v => v.id === id);
+    viaturaSelecionada = viaturas.find(v => (v.uid || v.id) === id);
     if (!viaturaSelecionada) return;
 
     detPrefixo.textContent = viaturaSelecionada.prefixo || "Sem prefixo";
@@ -883,7 +923,7 @@
     }
 
     const historico = manutencoes
-      .filter(m => m.prefixo === viaturaSelecionada.prefixo)
+      .filter(m => m.prefixo === viaturaSelecionada.prefixo && (!m.source || m.source === viaturaSelecionada.source))
       .sort((a,b) => (b.ts || 0) - (a.ts || 0));
 
     if (!historico.length) {
@@ -909,52 +949,23 @@
     });
   }
 
-  onValue(ref(db, "viaturas"), (snapshot) => {
-    const obj = snapshot.val() || {};
-    const arr = [];
-    for (const [id, v] of Object.entries(obj)) {
-      arr.push({ id, ...v });
-    }
-    viaturas = arr;
-    preencherFiltroMunicipio();
-    preencherCombosRelatorios();
-    renderTabela();
+  function recomporViaturas(){
+    viaturas=[...viaturasBtl.filter(v=>v.cia!=="2CIA"),...viaturas2Cia];
+    preencherFiltroMunicipio(); preencherCombosRelatorios(); renderTabela();
+    if(!viaturaSelecionada&&viaturas.length) selecionarViatura(viaturas[0].uid||viaturas[0].id);
+    else if(viaturaSelecionada){const atual=viaturas.find(v=>(v.uid||v.id)===(viaturaSelecionada.uid||viaturaSelecionada.id));if(atual)selecionarViatura(atual.uid||atual.id);else{viaturaSelecionada=null;renderHistorico()}}
+  }
+  function recomporManutencoes(){manutencoes=[...manutencoesBtl,...manutencoes2Cia];renderHistorico()}
 
-    if (!viaturaSelecionada && viaturas.length > 0) {
-      selecionarViatura(viaturas[0].id);
-    } else if (viaturaSelecionada) {
-      const aindaExiste = viaturas.find(v => v.id === viaturaSelecionada.id);
-      if (aindaExiste) {
-        selecionarViatura(aindaExiste.id);
-      } else {
-        viaturaSelecionada = null;
-        detPrefixo.textContent = "Selecione uma viatura";
-        detInfo.textContent    = "";
-        detObs.textContent     = "";
-        detStatus.innerHTML    = "";
-        renderHistorico();
-      }
-    }
-  }, (error) => {
-    console.error("Erro ao carregar viaturas:", error);
-    statusSistema.textContent = "Erro ao carregar dados da frota: " + (error.code || error.message);
-    statusSistema.classList.add("status-erro");
-  });
+  onValue(ref(db,"viaturas"),snapshot=>{viaturasBtl=Object.entries(snapshot.val()||{}).map(([id,v])=>({id,firebaseId:id,uid:`btl:${id}`,source:"btl",...v}));recomporViaturas()},error=>{statusSistema.textContent="Erro ao carregar frota do BTL: "+(error.code||error.message);statusSistema.classList.add("status-erro")});
+  onValue(ref(db2Cia,"viaturas"),snapshot=>{viaturas2Cia=Object.entries(snapshot.val()||{}).map(([id,v])=>({id,firebaseId:id,uid:`2cia:${id}`,source:"2cia",...v,cia:"2CIA"}));recomporViaturas()},error=>{console.error("Erro 2ª Cia",error);statusSistema.textContent="Erro ao carregar dados da 2ª Cia: "+(error.code||error.message);statusSistema.classList.add("status-erro")});
 
-  onValue(ref(db, "manutencoes"), (snapshot) => {
-    const obj = snapshot.val() || {};
-    const arr = [];
-    for (const [id, v] of Object.entries(obj)) {
-      arr.push({ id, ...v });
-    }
-    manutencoes = arr;
-    renderHistorico();
-  }, (error) => {
-    console.error("Erro ao carregar manutenções:", error);
-  });
+  onValue(ref(db,"manutencoes"),snapshot=>{manutencoesBtl=Object.entries(snapshot.val()||{}).map(([id,v])=>({id,source:"btl",...v}));recomporManutencoes()},error=>console.error("Erro manutenções BTL",error));
+  onValue(ref(db2Cia,"manutencoes"),snapshot=>{manutencoes2Cia=Object.entries(snapshot.val()||{}).map(([id,v])=>({id,source:"2cia",...v}));recomporManutencoes()},error=>console.error("Erro manutenções 2ª Cia",error));
 
   formManutencao.addEventListener("submit", async (e) => {
     e.preventDefault();
+    if(!usuarioLogado){alert("Faça login para lançar manutenção.");return}
 
     if (!viaturaSelecionada) {
       alert("Selecione uma viatura na tabela antes de lançar a manutenção.");
@@ -976,7 +987,7 @@
     };
 
     try {
-      const novaRef = push(ref(db, "manutencoes"));
+      const novaRef = push(ref(bancoDaViatura(viaturaSelecionada), "manutencoes"));
       await set(novaRef, manut);
       alert("Manutenção registrada com sucesso.");
       manuData.value = "";
@@ -998,6 +1009,7 @@
 
   formViatura.addEventListener("submit", async (e) => {
     e.preventDefault();
+    if(!usuarioLogado){alert("Faça login para cadastrar ou editar viaturas.");return}
 
     const payload = {
       municipio:  v_mun.value.trim(),
@@ -1028,7 +1040,7 @@
 
     try {
       if (viaturaEmEdicaoId) {
-        await set(ref(db, "viaturas/" + viaturaEmEdicaoId), payload);
+        await set(ref(bancoDaViatura(viaturaSelecionada), "viaturas/" + (viaturaSelecionada.firebaseId||viaturaEmEdicaoId)), payload);
         alert("Viatura atualizada com sucesso.");
       } else {
         const novaRef = push(ref(db, "viaturas"));
@@ -1059,16 +1071,17 @@
         alert("Selecione uma viatura na tabela para abrir a ficha completa.");
         return;
       }
-      window.open(`ficha-viatura.html?id=${encodeURIComponent(viaturaSelecionada.id)}`, "_blank");
+      window.open(`ficha-viatura.html?id=${encodeURIComponent(viaturaSelecionada.firebaseId||viaturaSelecionada.id)}&source=${encodeURIComponent(viaturaSelecionada.source||"btl")}`, "_blank");
     });
   }
 
   btnEditarViatura.addEventListener("click", () => {
+    if(!usuarioLogado){alert("Faça login para editar viaturas.");return}
     if (!viaturaSelecionada) {
       alert("Selecione uma viatura na tabela para editar.");
       return;
     }
-    viaturaEmEdicaoId = viaturaSelecionada.id;
+    viaturaEmEdicaoId = viaturaSelecionada.firebaseId || viaturaSelecionada.id;
 
     v_mun.value   = viaturaSelecionada.municipio || "";
     v_prog.value  = viaturaSelecionada.programa || "";
@@ -1085,6 +1098,7 @@
   });
 
   btnExcluirViatura.addEventListener("click", async () => {
+    if(!usuarioLogado){alert("Faça login para excluir viaturas.");return}
     if (!viaturaSelecionada) {
       alert("Selecione uma viatura para excluir.");
       return;
@@ -1097,12 +1111,14 @@
     if (!confirmar) return;
 
     try {
-      await set(ref(db, "viaturas/" + viaturaSelecionada.id), null);
+      const dbAlvo=bancoDaViatura(viaturaSelecionada);
+      await set(ref(dbAlvo, "viaturas/" + (viaturaSelecionada.firebaseId||viaturaSelecionada.id)), null);
 
       const prefixoAlvo = viaturaSelecionada.prefixo;
       const promessas = manutencoes
         .filter(m => m.prefixo === prefixoAlvo)
-        .map(m => set(ref(db, "manutencoes/" + m.id), null));
+        .filter(m => !m.source || m.source === viaturaSelecionada.source)
+        .map(m => set(ref(dbAlvo, "manutencoes/" + m.id), null));
       await Promise.all(promessas);
 
       alert("Viatura e manutenções excluídas com sucesso.");
@@ -1291,6 +1307,8 @@
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
   });
+
+  atualizarPermissoes();
 </script>
 
 </body>

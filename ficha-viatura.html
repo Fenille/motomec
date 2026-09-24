@@ -143,11 +143,15 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
     import { getDatabase, ref, onValue, push, set, update } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-database.js";
 
-    const firebaseConfig={apiKey:"AIzaSyBY5A_qTttsnEgocAvPMQWkZIFL3Pf17Ss",authDomain:"gestaoviaturas-daf3e.firebaseapp.com",projectId:"gestaoviaturas-daf3e",storageBucket:"gestaoviaturas-daf3e.firebasestorage.app",messagingSenderId:"120947990174",appId:"1:120947990174:web:c02805ea916c62f950e58f",measurementId:"G-9SP9K5H0HE",databaseURL:"https://frota18-a985c-default-rtdb.firebaseio.com/"};
+    const params=new URLSearchParams(location.search);
+    const source=params.get("source")||"btl";
+    const firebaseConfig={apiKey:"AIzaSyBY5A_qTttsnEgocAvPMQWkZIFL3Pf17Ss",authDomain:"gestaoviaturas-daf3e.firebaseapp.com",projectId:"gestaoviaturas-daf3e",storageBucket:"gestaoviaturas-daf3e.firebasestorage.app",messagingSenderId:"120947990174",appId:"1:120947990174:web:c02805ea916c62f950e58f",measurementId:"G-9SP9K5H0HE",databaseURL:source==="2cia"?"https://gestaoviaturas-daf3e-default-rtdb.firebaseio.com/":"https://frota18-a985c-default-rtdb.firebaseio.com/"};
     const db=getDatabase(initializeApp(firebaseConfig));
-    const id=new URLSearchParams(location.search).get("id");
+    const id=params.get("id");
     const usuariosAutorizados=[{login:"Fenille",senha:"140965"},{login:"Previato",senha:"132800"},{login:"Gleison",senha:"133069"},{login:"Melo",senha:"991315"}];
-    let viatura=null, manutencoes=[], processosBaixa=[], viaturasCarregadas=false, manutencoesCarregadas=false, processosCarregados=false, usuarioLogado="Sistema Motomec";
+    let viatura=null, manutencoes=[], processosBaixa=[], viaturasCarregadas=false, manutencoesCarregadas=false, processosCarregados=false;
+    const usuarioSessao=sessionStorage.getItem("frotaUsuario");
+    let usuarioLogado=usuariosAutorizados.some(u=>u.login===usuarioSessao)?usuarioSessao:null;
     const $=id=>document.getElementById(id);
     const texto=v=>(v===null||v===undefined||v==="")?"—":String(v);
     const dataBr=iso=>{if(!iso)return "—";const [a,m,d]=iso.split("-");return d&&m&&a?`${d}/${m}/${a}`:iso};
