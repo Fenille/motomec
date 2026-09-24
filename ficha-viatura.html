@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ficha da Viatura - Gestão de Frota</title>
+  <style>
+    :root{--amarelo:#ffff00;--neon:#f9ff7a;--cinza:#cfcfcf;--bg:#000;--card:rgba(10,10,15,.96);--borda:rgba(255,255,255,.15)}
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{min-height:100vh;font-family:Arial,Helvetica,sans-serif;background:radial-gradient(circle at top,#242424 0,#050509 52%,#000 100%);color:var(--amarelo);padding:18px}
+    .pagina{max-width:1250px;margin:auto}
+    header{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;flex-wrap:wrap;margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid var(--borda)}
+    h1{font-size:1.35rem;letter-spacing:.08em;text-transform:uppercase}
+    .subtitulo{color:var(--cinza);font-size:.8rem;margin-top:5px}
+    .acoes{display:flex;gap:8px;flex-wrap:wrap}
+    button{border:0;border-radius:999px;padding:8px 14px;background:linear-gradient(135deg,var(--neon),var(--amarelo));color:#000;font-weight:700;text-transform:uppercase;letter-spacing:.07em;cursor:pointer}
+    button.secundario{background:#151515;color:var(--amarelo);border:1px solid rgba(255,255,0,.45)}
+    .card{background:var(--card);border:1px solid var(--borda);border-radius:16px;padding:15px;box-shadow:0 16px 42px rgba(0,0,0,.72);margin-bottom:12px}
+    .card-titulo{font-size:.78rem;color:var(--cinza);text-transform:uppercase;letter-spacing:.12em;margin-bottom:12px}
+    .identificacao{display:grid;grid-template-columns:repeat(4,minmax(145px,1fr));gap:10px}
+    .campo{border-left:3px solid rgba(255,255,0,.55);padding:4px 9px;min-height:48px}
+    .rotulo{font-size:.65rem;text-transform:uppercase;letter-spacing:.1em;color:#999;margin-bottom:5px}
+    .valor{font-size:.93rem;color:var(--neon);overflow-wrap:anywhere}
+    .status{display:inline-flex;border-radius:999px;padding:3px 9px;font-size:.73rem;font-weight:700;letter-spacing:.06em}
+    .operando{color:#b2ffba;border:1px solid #00c83c;background:rgba(0,180,0,.18)}
+    .baixada{color:#ffc0c0;border:1px solid #ff5050;background:rgba(220,0,0,.18)}
+    .indicadores{display:grid;grid-template-columns:repeat(4,1fr);gap:9px}
+    .baixa-grid{display:grid;grid-template-columns:repeat(4,minmax(140px,1fr));gap:10px}.baixa-grid .largo{grid-column:span 2}.destaque-baixa{border:1px solid rgba(255,80,80,.45);background:rgba(90,0,0,.12)}.timeline{display:flex;flex-direction:column;gap:8px;margin-top:12px}.timeline-item{border-left:3px solid var(--amarelo);background:#050509;border-radius:0 10px 10px 0;padding:9px 11px}.timeline-top{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}.timeline-etapa{font-weight:700;color:var(--neon)}.timeline-data{color:var(--cinza);font-size:.75rem}.timeline-obs{color:#ddd;font-size:.78rem;margin-top:5px}.timeline-valor{color:#b2ffba;font-size:.75rem;margin-top:4px}
+    .indicador{background:#050509;border:1px solid var(--borda);border-radius:12px;padding:12px;text-align:center}
+    .indicador strong{font-size:1.35rem;color:var(--neon);display:block;margin-bottom:4px}
+    .indicador span{font-size:.68rem;color:var(--cinza);text-transform:uppercase;letter-spacing:.08em}
+    .filtros{display:flex;gap:9px;flex-wrap:wrap;align-items:end;margin-bottom:11px}
+    .form-grid{display:grid;grid-template-columns:repeat(4,minmax(140px,1fr));gap:10px}
+    .form-grid .filtro.descricao-form{grid-column:span 4}
+    textarea{min-height:72px;resize:vertical;border-radius:12px;border:1px solid var(--borda);background:#050509;color:var(--amarelo);padding:9px;outline:none}
+    .barra-login{display:flex;gap:7px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
+    .barra-login input{max-width:150px}.login-info{font-size:.75rem;color:var(--cinza);margin-right:auto}
+    .perigo{background:linear-gradient(135deg,#ff9292,#ff1d1d);box-shadow:none}
+    button:disabled,input:disabled,select:disabled,textarea:disabled{opacity:.48;cursor:not-allowed}
+    .filtro{display:flex;flex-direction:column;gap:4px;min-width:150px}
+    label{font-size:.65rem;text-transform:uppercase;letter-spacing:.09em;color:var(--cinza)}
+    input,select{border-radius:999px;border:1px solid var(--borda);background:#050509;color:var(--amarelo);padding:7px 10px;outline:none}
+    .tabela-wrap{overflow:auto;border:1px solid var(--borda);border-radius:12px}
+    table{width:100%;border-collapse:collapse;font-size:.79rem}
+    th,td{padding:9px;text-align:left;vertical-align:top;border-bottom:1px solid rgba(255,255,255,.09)}
+    th{color:var(--cinza);font-size:.67rem;text-transform:uppercase;letter-spacing:.08em;background:#111;white-space:nowrap}
+    td{color:#eee}.descricao{min-width:260px;white-space:normal}.vazio{color:var(--cinza);font-style:italic;padding:18px;text-align:center}
+    .carregando{text-align:center;color:var(--cinza);padding:35px}.erro{color:#ff8c8c}
+    footer{text-align:center;color:#777;font-size:.67rem;padding:8px}
+    @media(max-width:760px){body{padding:10px}.identificacao,.form-grid{grid-template-columns:repeat(2,1fr)}.form-grid .filtro.descricao-form{grid-column:span 2}.indicadores{grid-template-columns:repeat(2,1fr)}h1{font-size:1.05rem}}
+    @media print{body{background:#fff;color:#000;padding:0}.pagina{max-width:none}.acoes,.filtros,.nao-imprimir{display:none!important}.card{background:#fff;color:#000;box-shadow:none;border:1px solid #bbb;break-inside:avoid}.valor,.indicador strong{color:#000}.card-titulo,.rotulo,.indicador span,footer{color:#444}.tabela-wrap{overflow:visible}table{font-size:9pt}th,td{color:#000;border-color:#ccc}.status{color:#000;border-color:#555;background:#fff}}
+  </style>
+</head>
+<body>
+  <div class="pagina">
+    <header>
+      <div><h1 id="titulo">Ficha completa da viatura</h1><div class="subtitulo">Cadastro e relatório detalhado de manutenção • 2ª Cia do 18º BPM/I</div></div>
+      <div class="acoes"><button class="secundario" type="button" id="btnAtualizar">Atualizar</button><button class="secundario" type="button" id="btnCsv">Exportar CSV</button><button type="button" id="btnImprimir">Imprimir / PDF</button></div>
+    </header>
+
+    <div id="mensagem" class="card carregando">Carregando cadastro e manutenções...</div>
+
+    <main id="conteudo" hidden>
+      <section class="card">
+        <div class="card-titulo">Cadastro da viatura</div>
+        <div class="identificacao">
+          <div class="campo"><div class="rotulo">Prefixo</div><div class="valor" id="prefixo"></div></div>
+          <div class="campo"><div class="rotulo">Placa</div><div class="valor" id="placa"></div></div>
+          <div class="campo"><div class="rotulo">Município</div><div class="valor" id="municipio"></div></div>
+          <div class="campo"><div class="rotulo">Programa</div><div class="valor" id="programa"></div></div>
+          <div class="campo"><div class="rotulo">Situação</div><div class="valor" id="situacao"></div></div>
+          <div class="campo" id="campoDiasBaixa"><div class="rotulo">Tempo baixada</div><div class="valor" id="diasBaixa">—</div></div>
+          <div class="campo" id="campoDataBaixa"><div class="rotulo">Data da baixa</div><div class="valor" id="dataBaixa">—</div></div>
+          <div class="campo" id="campoValorEstimado"><div class="rotulo">Valor estimado da manutenção</div><div class="valor" id="valorEstimado">—</div></div>
+          <div class="campo" style="grid-column:span 4"><div class="rotulo">Observação</div><div class="valor" id="observacao"></div></div>
+        </div>
+        <div style="display:flex;justify-content:flex-end;margin-top:14px" class="nao-imprimir"><button type="button" class="perigo" id="btnExcluir">Excluir esta viatura</button></div>
+      </section>
+
+      <section class="card destaque-baixa" id="secaoBaixa" hidden>
+        <div class="card-titulo">Acompanhamento do processo de manutenção durante a baixa</div>
+        <div class="nao-imprimir">
+          <form id="formProcessoBaixa">
+            <div class="baixa-grid">
+              <div class="filtro"><label for="procData">Data da atualização</label><input type="date" id="procData" required></div>
+              <div class="filtro largo"><label for="procEtapa">Etapa / status do processo</label><select id="procEtapa" required><option value="">Selecione</option><option>Elaborando orçamento</option><option>Elaborando projeto</option><option>Aguardando empenho da UGE</option><option>Aguardando pregão</option><option>Em manutenção</option><option>Aguardando peças</option><option>Aguardando liberação</option><option>Outro</option></select></div>
+              <div class="filtro"><label for="procValor">Valor estimado (R$)</label><input type="number" id="procValor" min="0" step="0.01" placeholder="0,00"></div>
+              <div class="filtro largo" id="grupoEtapaOutro" hidden><label for="procEtapaOutro">Informe o status</label><input id="procEtapaOutro" placeholder="Digite a etapa/status"></div>
+              <div class="filtro largo"><label for="procObs">Observação / andamento</label><textarea id="procObs" placeholder="Ex.: orçamento encaminhado, processo enviado à UGE, previsão da oficina..."></textarea></div>
+            </div>
+            <div style="display:flex;justify-content:flex-end;margin-top:10px"><button type="submit" id="btnSalvarProcesso">Salvar atualização da baixa</button></div>
+          </form>
+        </div>
+        <div class="timeline" id="timelineBaixa"></div>
+      </section>
+
+      <section class="card nao-imprimir">
+        <div class="card-titulo">Cadastrar nova manutenção</div>
+        <div class="barra-login">
+          <span class="login-info" id="loginInfo">Modo visualização. Entre para lançar ou excluir.</span>
+          <input id="loginUser" placeholder="Login" autocomplete="username">
+          <input id="loginPass" type="password" placeholder="Senha" autocomplete="current-password">
+          <button type="button" class="secundario" id="btnLogin">Entrar</button>
+          <button type="button" class="secundario" id="btnLogout" hidden>Sair</button>
+        </div>
+        <form id="formManutencao">
+          <div class="form-grid">
+            <div class="filtro"><label for="manuData">Data</label><input type="date" id="manuData" required></div>
+            <div class="filtro"><label for="manuTipo">Tipo</label><select id="manuTipo" required><option value="">Selecione</option><option>Troca de óleo</option><option>Preventiva</option><option>Corretiva</option><option>Outro</option></select></div>
+            <div class="filtro"><label for="manuKm">Km</label><input type="number" id="manuKm" min="0"></div>
+            <div class="filtro"><label for="manuStatus">Status</label><select id="manuStatus"><option>Executada</option><option>Prevista</option></select></div>
+            <div class="filtro descricao-form"><label for="manuDesc">Descrição</label><textarea id="manuDesc" placeholder="Detalhes do serviço, peças, OS, empresa..."></textarea></div>
+          </div>
+          <div style="display:flex;justify-content:flex-end;margin-top:10px"><button type="submit" id="btnSalvarManutencao">Salvar manutenção</button></div>
+        </form>
+      </section>
+
+      <section class="card">
+        <div class="card-titulo">Resumo das manutenções</div>
+        <div class="indicadores">
+          <div class="indicador"><strong id="total">0</strong><span>Total de registros</span></div>
+          <div class="indicador"><strong id="executadas">0</strong><span>Executadas</span></div>
+          <div class="indicador"><strong id="previstas">0</strong><span>Previstas</span></div>
+          <div class="indicador"><strong id="ultimaKm">—</strong><span>Última quilometragem</span></div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="card-titulo">Histórico detalhado</div>
+        <div class="filtros">
+          <div class="filtro"><label for="filtroStatus">Status</label><select id="filtroStatus"><option value="">Todos</option><option>Executada</option><option>Prevista</option></select></div>
+          <div class="filtro"><label for="dataInicial">Data inicial</label><input type="date" id="dataInicial"></div>
+          <div class="filtro"><label for="dataFinal">Data final</label><input type="date" id="dataFinal"></div>
+          <button type="button" class="secundario" id="btnLimpar">Limpar filtros</button>
+        </div>
+        <div class="tabela-wrap"><table><thead><tr><th>Data</th><th>Tipo</th><th>Status</th><th>Km</th><th>Descrição / serviço realizado</th></tr></thead><tbody id="corpoTabela"></tbody></table></div>
+      </section>
+    </main>
+    <footer id="rodape"></footer>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+    import { getDatabase, ref, onValue, push, set, update } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-database.js";
+
+    const firebaseConfig={apiKey:"AIzaSyBY5A_qTttsnEgocAvPMQWkZIFL3Pf17Ss",authDomain:"gestaoviaturas-daf3e.firebaseapp.com",projectId:"gestaoviaturas-daf3e",storageBucket:"gestaoviaturas-daf3e.firebasestorage.app",messagingSenderId:"120947990174",appId:"1:120947990174:web:c02805ea916c62f950e58f",measurementId:"G-9SP9K5H0HE",databaseURL:"https://gestaoviaturas-daf3e-default-rtdb.firebaseio.com/"};
+    const db=getDatabase(initializeApp(firebaseConfig));
+    const id=new URLSearchParams(location.search).get("id");
+    const usuariosAutorizados=[{login:"Fenille",senha:"140965"},{login:"Previato",senha:"132800"},{login:"Gleison",senha:"133069"},{login:"Melo",senha:"991315"}];
+    let viatura=null, manutencoes=[], processosBaixa=[], viaturasCarregadas=false, manutencoesCarregadas=false, processosCarregados=false, usuarioLogado="Sistema Motomec";
+    const $=id=>document.getElementById(id);
+    const texto=v=>(v===null||v===undefined||v==="")?"—":String(v);
+    const dataBr=iso=>{if(!iso)return "—";const [a,m,d]=iso.split("-");return d&&m&&a?`${d}/${m}/${a}`:iso};
+    const numero=v=>v===null||v===undefined||v===""?"—":Number(v).toLocaleString("pt-BR");
+    const moeda=v=>v===null||v===undefined||v===""?"—":Number(v).toLocaleString("pt-BR",{style:"currency",currency:"BRL"});
+    function calcularDiasBaixa(){if(!viatura||viatura.situacao!=="BAIXADA"||!viatura.dataBaixa)return null;const ini=new Date(viatura.dataBaixa+"T00:00:00"),hoje=new Date();hoje.setHours(0,0,0,0);return Math.max(0,Math.floor((hoje-ini)/86400000))}
+    function processosDaViatura(){return processosBaixa.filter(p=>p.viaturaId===id).sort((a,b)=>(b.data||"").localeCompare(a.data||"")||(b.ts||0)-(a.ts||0))}
+    function renderProcessosBaixa(){const box=$("timelineBaixa");box.replaceChildren();const lista=processosDaViatura();if(!lista.length){const d=document.createElement("div");d.className="vazio";d.textContent="Nenhuma atualização do processo de baixa registrada.";box.appendChild(d);return}lista.forEach(p=>{const d=document.createElement("div");d.className="timeline-item";d.innerHTML=`<div class="timeline-top"><span class="timeline-etapa"></span><span class="timeline-data"></span></div><div class="timeline-obs"></div><div class="timeline-valor"></div>`;d.querySelector(".timeline-etapa").textContent=texto(p.etapa);d.querySelector(".timeline-data").textContent=dataBr(p.data);d.querySelector(".timeline-obs").textContent=p.observacao||"Sem observação.";d.querySelector(".timeline-valor").textContent=p.valorEstimado!==null&&p.valorEstimado!==undefined?`Valor estimado: ${moeda(p.valorEstimado)}`:"Valor estimado não informado";box.appendChild(d)})}
+    function atualizarPainelBaixa(){const baixada=viatura?.situacao==="BAIXADA";$("secaoBaixa").hidden=!baixada;["campoDiasBaixa","campoDataBaixa","campoValorEstimado"].forEach(c=>$(c).hidden=!baixada);if(!baixada)return;const dias=calcularDiasBaixa();$("diasBaixa").textContent=dias===null?"Data da baixa não registrada":`${dias} dia${dias===1?"":"s"}`;$("dataBaixa").textContent=dataBr(viatura.dataBaixa);const lista=processosDaViatura();const ultimoValor=lista.find(p=>p.valorEstimado!==null&&p.valorEstimado!==undefined&&p.valorEstimado!=="");$("valorEstimado").textContent=ultimoValor?moeda(ultimoValor.valorEstimado):"—";renderProcessosBaixa()}
+
+    function concluirCarga(){
+      if(!viaturasCarregadas||!manutencoesCarregadas||!processosCarregados)return;
+      if(!id){mostrarErro("Não foi informada uma viatura para abrir a ficha.");return}
+      if(!viatura){mostrarErro("A viatura solicitada não foi encontrada ou foi excluída.");return}
+      $("mensagem").hidden=true;$("conteudo").hidden=false;
+      $("titulo").textContent=`Ficha da viatura ${texto(viatura.prefixo)}`;
+      document.title=`Ficha ${texto(viatura.prefixo)} - Gestão de Frota`;
+      ["prefixo","placa","municipio","programa","observacao"].forEach(c=>$(c).textContent=texto(viatura[c]));
+      const status=document.createElement("span");status.className=`status ${viatura.situacao==="OPERANDO"?"operando":"baixada"}`;status.textContent=texto(viatura.situacao);$("situacao").replaceChildren(status);
+      $("rodape").textContent=`Ficha consultada em ${new Date().toLocaleString("pt-BR")}`;
+      atualizarResumo();renderTabela();atualizarPainelBaixa();
+    }
+    function mostrarErro(msg){$("mensagem").hidden=false;$("mensagem").classList.add("erro");$("mensagem").textContent=msg;$("conteudo").hidden=true}
+    function manutencaoPertence(m){if(m.viaturaId)return m.viaturaId===id;if(m.prefixo!==viatura?.prefixo)return false;if(!viatura?.createdAt||!m.data)return true;return m.data>=new Date(viatura.createdAt).toISOString().slice(0,10)}
+    function historicoCompleto(){return manutencoes.filter(manutencaoPertence).sort((a,b)=>(b.data||"").localeCompare(a.data||"")||(b.ts||0)-(a.ts||0))}
+    function registrosFiltrados(){return historicoCompleto().filter(m=>(!$("filtroStatus").value||m.status===$("filtroStatus").value)&&(!$("dataInicial").value||m.data>=$("dataInicial").value)&&(!$("dataFinal").value||m.data<=$("dataFinal").value))}
+    function atualizarResumo(){const lista=historicoCompleto();$("total").textContent=lista.length;$("executadas").textContent=lista.filter(m=>(m.status||"").toLowerCase()==="executada").length;$("previstas").textContent=lista.filter(m=>(m.status||"").toLowerCase()==="prevista").length;const kms=lista.filter(m=>m.km!==null&&m.km!==undefined&&m.km!=="").map(m=>Number(m.km)).filter(Number.isFinite);$("ultimaKm").textContent=kms.length?numero(Math.max(...kms)):"—"}
+    function renderTabela(){const corpo=$("corpoTabela");corpo.replaceChildren();const lista=registrosFiltrados();if(!lista.length){const tr=document.createElement("tr"),td=document.createElement("td");td.colSpan=5;td.className="vazio";td.textContent="Nenhuma manutenção encontrada para os filtros selecionados.";tr.appendChild(td);corpo.appendChild(tr);return}lista.forEach(m=>{const tr=document.createElement("tr");[dataBr(m.data),texto(m.tipo),texto(m.status),numero(m.km),texto(m.descricao)].forEach((valor,i)=>{const td=document.createElement("td");td.textContent=valor;if(i===4)td.className="descricao";tr.appendChild(td)});corpo.appendChild(tr)})}
+    function exportarCsv(){if(!viatura)return;const linhas=[["Data","Prefixo","Placa","Município","Programa","Tipo","Status","Km","Descrição"]];registrosFiltrados().forEach(m=>linhas.push([dataBr(m.data),viatura.prefixo||"",viatura.placa||"",viatura.municipio||"",viatura.programa||"",m.tipo||"",m.status||"",m.km??"",m.descricao||""]));const csv="\ufeff"+linhas.map(l=>l.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(";")).join("\r\n");const url=URL.createObjectURL(new Blob([csv],{type:"text/csv;charset=utf-8"}));const a=document.createElement("a");a.href=url;a.download=`ficha_${(viatura.prefixo||"viatura").replace(/[^a-z0-9_-]/gi,"_")}.csv`;a.click();URL.revokeObjectURL(url)}
+    function atualizarPermissoes(){const pode=!!usuarioLogado;["manuData","manuTipo","manuKm","manuStatus","manuDesc","btnSalvarManutencao","btnExcluir","procData","procEtapa","procValor","procEtapaOutro","procObs","btnSalvarProcesso"].forEach(c=>$(c).disabled=!pode);$("loginInfo").textContent=pode?`Logado como ${usuarioLogado}. Pode lançar manutenções e excluir.`:"Modo visualização. Entre para lançar ou excluir.";$("loginUser").hidden=pode;$("loginPass").hidden=pode;$("btnLogin").hidden=pode;$("btnLogout").hidden=!pode}
+
+    $("btnLogin").addEventListener("click",()=>{const user=$("loginUser").value.trim(),pass=$("loginPass").value.trim();const encontrado=usuariosAutorizados.find(u=>u.login.toLowerCase()===user.toLowerCase()&&u.senha===pass);if(!encontrado){alert("Login ou senha inválidos.");return}usuarioLogado=encontrado.login;sessionStorage.setItem("frotaUsuario",usuarioLogado);$("loginPass").value="";atualizarPermissoes()});
+    $("btnLogout").addEventListener("click",()=>{usuarioLogado=null;sessionStorage.removeItem("frotaUsuario");atualizarPermissoes()});
+    $("formManutencao").addEventListener("submit",async e=>{e.preventDefault();if(!usuarioLogado){alert("Entre no sistema para lançar uma manutenção.");return}if(!viatura||!$("manuData").value||!$("manuTipo").value){alert("Preencha a data e o tipo da manutenção.");return}const manut={viaturaId:id,prefixo:viatura.prefixo||"",data:$("manuData").value,tipo:$("manuTipo").value,km:$("manuKm").value?parseInt($("manuKm").value,10):null,status:$("manuStatus").value||"Executada",descricao:$("manuDesc").value.trim(),usuario:usuarioLogado,ts:Date.now()};try{await set(push(ref(db,"manutencoes")),manut);$("manuData").value=$("manuTipo").value=$("manuKm").value=$("manuDesc").value="";$("manuStatus").value="Executada";alert("Manutenção registrada com sucesso.")}catch(erro){alert(`Erro ao salvar manutenção: ${erro.code||erro.message}`)}});
+    $("procEtapa").addEventListener("change",()=>{$("grupoEtapaOutro").hidden=$("procEtapa").value!=="Outro"});
+    $("formProcessoBaixa").addEventListener("submit",async e=>{e.preventDefault();if(!usuarioLogado){alert("Entre no sistema para registrar o andamento da baixa.");return}if(!viatura||viatura.situacao!=="BAIXADA"){alert("Este acompanhamento só fica disponível para viaturas baixadas.");return}let etapa=$("procEtapa").value;if(etapa==="Outro")etapa=$("procEtapaOutro").value.trim();if(!$("procData").value||!etapa){alert("Informe a data e a etapa/status do processo.");return}const registro={viaturaId:id,prefixo:viatura.prefixo||"",data:$("procData").value,etapa,observacao:$("procObs").value.trim(),valorEstimado:$("procValor").value!==""?Number($("procValor").value):null,usuario:usuarioLogado,ts:Date.now()};try{await set(push(ref(db,"processosBaixa")),registro);$("procEtapa").value="";$("procEtapaOutro").value="";$("grupoEtapaOutro").hidden=true;$("procObs").value="";alert("Atualização da baixa registrada com sucesso.")}catch(erro){alert(`Erro ao salvar atualização: ${erro.code||erro.message}`)}});
+
+    $("btnExcluir").addEventListener("click",async()=>{if(!usuarioLogado||!viatura){alert("Entre no sistema para excluir a viatura.");return}const alvo={...viatura};if(!confirm(`ATENÇÃO: deseja iniciar a exclusão da viatura ${alvo.prefixo} (${alvo.municipio}, ${alvo.programa})?\n\nSomente as manutenções vinculadas a este cadastro serão excluídas.`))return;const digitado=prompt(`SEGUNDA CHECAGEM: digite exatamente o prefixo ${alvo.prefixo}:`);if(digitado!==alvo.prefixo){alert("Prefixo diferente. Exclusão cancelada.");return}try{const exclusoes={[`viaturas/${id}`]:null};manutencoes.filter(m=>m.viaturaId===id || (!m.viaturaId && m.prefixo===viatura?.prefixo)).forEach(m=>exclusoes[`manutencoes/${m.id}`]=null);processosBaixa.filter(p=>p.viaturaId===id).forEach(p=>exclusoes[`processosBaixa/${p.id}`]=null);await update(ref(db),exclusoes);alert("Viatura excluída com sucesso. Registros de outra viatura com o mesmo prefixo foram preservados.");location.href="index.html"}catch(erro){alert(`Erro ao excluir viatura: ${erro.code||erro.message}`)}});
+
+    if(!id){viaturasCarregadas=manutencoesCarregadas=processosCarregados=true;concluirCarga()}else{
+      onValue(ref(db,`viaturas/${id}`),snap=>{const v=snap.val();viatura=v?{id,...v}:null;viaturasCarregadas=true;concluirCarga()},e=>mostrarErro(`Erro ao carregar o cadastro: ${e.code||e.message}`));
+      onValue(ref(db,"manutencoes"),snap=>{manutencoes=Object.entries(snap.val()||{}).map(([mid,v])=>({id:mid,...v}));manutencoesCarregadas=true;concluirCarga()},e=>mostrarErro(`Erro ao carregar as manutenções: ${e.code||e.message}`));
+      onValue(ref(db,"processosBaixa"),snap=>{processosBaixa=Object.entries(snap.val()||{}).map(([pid,v])=>({id:pid,...v}));processosCarregados=true;concluirCarga();if(viatura)atualizarPainelBaixa()},e=>mostrarErro(`Erro ao carregar o andamento da baixa: ${e.code||e.message}`));
+    }
+    ["filtroStatus","dataInicial","dataFinal"].forEach(c=>$(c).addEventListener(c==="filtroStatus"?"change":"input",renderTabela));
+    $("btnLimpar").addEventListener("click",()=>{$("filtroStatus").value=$("dataInicial").value=$("dataFinal").value="";renderTabela()});
+    $("btnAtualizar").addEventListener("click",()=>location.reload());$("btnCsv").addEventListener("click",exportarCsv);$("btnImprimir").addEventListener("click",()=>window.print());
+    $("procData").value=new Date().toISOString().slice(0,10);
+    atualizarPermissoes();
+  </script>
+</body>
+</html>

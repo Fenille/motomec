@@ -501,6 +501,7 @@
       <span class="tag-mini" id="detObs"></span>
       <div class="acoes-detalhes">
         <button type="button" id="btnEditarViatura" class="btn-editar">Editar viatura</button>
+        <button type="button" id="btnFichaCompleta" class="btn-editar">Abrir ficha completa</button>
         <button type="button" id="btnExcluirViatura" class="btn-excluir">Excluir viatura</button>
       </div>
     </div>
@@ -974,6 +975,13 @@
     }
   });
 
+  v_sit.addEventListener("change", () => {
+    if (v_sit.value === "BAIXADA" && !v_data_baixa.value) {
+      v_data_baixa.value = new Date().toISOString().slice(0,10);
+    }
+    if (v_sit.value !== "BAIXADA") v_data_baixa.value = "";
+  });
+
   formViatura.addEventListener("submit", async (e) => {
     e.preventDefault();
 
@@ -987,7 +995,7 @@
       observacao: v_obs.value.trim(),
       ts:         Date.now(),
       cia:        CIA_ID,
-      dataBaixa:  v_data_baixa.value
+      dataBaixa:  v_sit.value === "BAIXADA" ? (v_data_baixa.value || (viaturaSelecionada?.dataBaixa || new Date().toISOString().slice(0,10))) : ""
     };
 
     if (!payload.municipio || !payload.programa || !payload.prefixo) {
@@ -1020,6 +1028,17 @@
       alert("Erro ao salvar viatura:\n" + (e2.code || e2.message));
     }
   });
+
+  const btnFichaCompleta = document.getElementById("btnFichaCompleta");
+  if (btnFichaCompleta) {
+    btnFichaCompleta.addEventListener("click", () => {
+      if (!viaturaSelecionada) {
+        alert("Selecione uma viatura na tabela para abrir a ficha completa.");
+        return;
+      }
+      window.open(`ficha-viatura.html?id=${encodeURIComponent(viaturaSelecionada.id)}`, "_blank");
+    });
+  }
 
   btnEditarViatura.addEventListener("click", () => {
     if (!viaturaSelecionada) {
