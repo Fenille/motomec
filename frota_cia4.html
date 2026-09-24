@@ -756,7 +756,7 @@
   }
 
   function preencherFiltroMunicipio() {
-    const municipios = Array.from(new Set(viaturas.map(v => v.municipio))).sort();
+    const municipios = [...MUNICIPIOS_CIA];
     filtroMunicipio.innerHTML = '<option value="">Todos</option>';
     municipios.forEach(m => {
       if (!m) return;
@@ -778,7 +778,7 @@
       relPrefixo.appendChild(opt);
     });
 
-    const municipios = Array.from(new Set(viaturas.map(v => v.municipio))).sort();
+    const municipios = [...MUNICIPIOS_CIA];
     relMunicipio.innerHTML = '<option value="">Todos</option>';
     municipios.forEach(m => {
       if (!m) return;
@@ -907,7 +907,7 @@
     const obj = snapshot.val() || {};
     const arr = [];
     for (const [id, v] of Object.entries(obj)) {
-      arr.push({ id, ...v });
+      if ((v.cia || "").toUpperCase().replace(/\s+/g, "") === "4CIA" || ("4CIA" === "FT" && ["FT","CIAFT","CIAFT.","CIAFTPM"].includes((v.cia||"").toUpperCase().replace(/\s+/g,"")))) arr.push({ id, ...v });
     }
     viaturas = arr;
     preencherFiltroMunicipio();
@@ -939,7 +939,7 @@
     const obj = snapshot.val() || {};
     const arr = [];
     for (const [id, v] of Object.entries(obj)) {
-      arr.push({ id, ...v });
+      if ((v.cia || "").toUpperCase().replace(/\s+/g, "") === "4CIA" || ("4CIA" === "FT" && ["FT","CIAFT","CIAFT.","CIAFTPM"].includes((v.cia||"").toUpperCase().replace(/\s+/g,"")))) arr.push({ id, ...v });
     }
     manutencoes = arr;
     renderHistorico();
@@ -1044,7 +1044,7 @@
         alert("Selecione uma viatura na tabela para abrir a ficha completa.");
         return;
       }
-      window.open(`ficha-viatura.html?id=${encodeURIComponent(viaturaSelecionada.id)}`, "_blank");
+      window.open(`ficha-viatura.html?id=${encodeURIComponent(viaturaSelecionada.id)}&source=btl&cia=4CIA`, "_blank");
     });
   }
 

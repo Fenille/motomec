@@ -145,13 +145,27 @@
 
     const params=new URLSearchParams(location.search);
     const source=params.get("source")||"btl";
+    const ciaFicha=(params.get("cia")||"").toUpperCase();
     const firebaseConfig={apiKey:"AIzaSyBY5A_qTttsnEgocAvPMQWkZIFL3Pf17Ss",authDomain:"gestaoviaturas-daf3e.firebaseapp.com",projectId:"gestaoviaturas-daf3e",storageBucket:"gestaoviaturas-daf3e.firebasestorage.app",messagingSenderId:"120947990174",appId:"1:120947990174:web:c02805ea916c62f950e58f",measurementId:"G-9SP9K5H0HE",databaseURL:source==="2cia"?"https://gestaoviaturas-daf3e-default-rtdb.firebaseio.com/":"https://frota18-a985c-default-rtdb.firebaseio.com/"};
     const db=getDatabase(initializeApp(firebaseConfig));
     const id=params.get("id");
-    const usuariosAutorizados=[{login:"Fenille",senha:"140965"},{login:"Previato",senha:"132800"},{login:"Gleison",senha:"133069"},{login:"Melo",senha:"991315"}];
+    const usuariosAutorizados=[
+      {login:"Fenille",senha:"140965",modulos:["1CIA","2CIA","3CIA","4CIA","5CIA","FT","EM","BTL"]},
+      {login:"1cia",senha:"1cia123",modulos:["1CIA"]},
+      {login:"2cia",senha:"2cia123",modulos:["2CIA"]},
+      {login:"3cia",senha:"3cia123",modulos:["3CIA"]},
+      {login:"4cia",senha:"4cia123",modulos:["4CIA"]},
+      {login:"5cia",senha:"5cia123",modulos:["5CIA"]},
+      {login:"ft",senha:"ft123",modulos:["FT"]},
+      {login:"em",senha:"em123",modulos:["EM"]},
+      {login:"btl",senha:"btl123",modulos:["1CIA","2CIA","3CIA","4CIA","5CIA","FT","EM","BTL"]},
+      {login:"Previato",senha:"132800",modulos:["2CIA"]},{login:"Gleison",senha:"133069",modulos:["2CIA"]},{login:"Melo",senha:"991315",modulos:["2CIA"]}
+    ];
     let viatura=null, manutencoes=[], processosBaixa=[], viaturasCarregadas=false, manutencoesCarregadas=false, processosCarregados=false;
     const usuarioSessao=sessionStorage.getItem("frotaUsuario");
-    let usuarioLogado=usuariosAutorizados.some(u=>u.login===usuarioSessao)?usuarioSessao:null;
+    const moduloSessao=sessionStorage.getItem("frotaModulo");
+    const usuarioSessaoObj=usuariosAutorizados.find(u=>u.login.toLowerCase()===(usuarioSessao||"").toLowerCase());
+    let usuarioLogado=(usuarioSessaoObj && (!ciaFicha || usuarioSessaoObj.modulos.includes(ciaFicha)) && (!moduloSessao || moduloSessao===ciaFicha || usuarioSessaoObj.modulos.includes("BTL")))?usuarioSessaoObj.login:null;
     const $=id=>document.getElementById(id);
     const texto=v=>(v===null||v===undefined||v==="")?"—":String(v);
     const dataBr=iso=>{if(!iso)return "—";const [a,m,d]=iso.split("-");return d&&m&&a?`${d}/${m}/${a}`:iso};
@@ -183,8 +197,8 @@
     function exportarCsv(){if(!viatura)return;const linhas=[["Data","Prefixo","Placa","Município","Programa","Tipo","Status","Km","Descrição"]];registrosFiltrados().forEach(m=>linhas.push([dataBr(m.data),viatura.prefixo||"",viatura.placa||"",viatura.municipio||"",viatura.programa||"",m.tipo||"",m.status||"",m.km??"",m.descricao||""]));const csv="\ufeff"+linhas.map(l=>l.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(";")).join("\r\n");const url=URL.createObjectURL(new Blob([csv],{type:"text/csv;charset=utf-8"}));const a=document.createElement("a");a.href=url;a.download=`ficha_${(viatura.prefixo||"viatura").replace(/[^a-z0-9_-]/gi,"_")}.csv`;a.click();URL.revokeObjectURL(url)}
     function atualizarPermissoes(){const pode=!!usuarioLogado;["manuData","manuTipo","manuKm","manuStatus","manuDesc","btnSalvarManutencao","btnExcluir","procData","procEtapa","procValor","procEtapaOutro","procObs","btnSalvarProcesso"].forEach(c=>$(c).disabled=!pode);$("loginInfo").textContent=pode?`Logado como ${usuarioLogado}. Pode lançar manutenções e excluir.`:"Modo visualização. Entre para lançar ou excluir.";$("loginUser").hidden=pode;$("loginPass").hidden=pode;$("btnLogin").hidden=pode;$("btnLogout").hidden=!pode}
 
-    $("btnLogin").addEventListener("click",()=>{const user=$("loginUser").value.trim(),pass=$("loginPass").value.trim();const encontrado=usuariosAutorizados.find(u=>u.login.toLowerCase()===user.toLowerCase()&&u.senha===pass);if(!encontrado){alert("Login ou senha inválidos.");return}usuarioLogado=encontrado.login;sessionStorage.setItem("frotaUsuario",usuarioLogado);$("loginPass").value="";atualizarPermissoes()});
-    $("btnLogout").addEventListener("click",()=>{usuarioLogado=null;sessionStorage.removeItem("frotaUsuario");atualizarPermissoes()});
+    $("btnLogin").addEventListener("click",()=>{const user=$("loginUser").value.trim(),pass=$("loginPass").value.trim();const encontrado=usuariosAutorizados.find(u=>u.login.toLowerCase()===user.toLowerCase()&&u.senha===pass);if(!encontrado){alert("Login ou senha inválidos.");return}if(ciaFicha && !encontrado.modulos.includes(ciaFicha)){alert("Este login não possui permissão para editar a ficha desta Companhia.");return}usuarioLogado=encontrado.login;sessionStorage.setItem("frotaUsuario",usuarioLogado);sessionStorage.setItem("frotaModulo",ciaFicha||"BTL");$("loginPass").value="";atualizarPermissoes()});
+    $("btnLogout").addEventListener("click",()=>{usuarioLogado=null;sessionStorage.removeItem("frotaUsuario");sessionStorage.removeItem("frotaModulo");atualizarPermissoes()});
     $("formManutencao").addEventListener("submit",async e=>{e.preventDefault();if(!usuarioLogado){alert("Entre no sistema para lançar uma manutenção.");return}if(!viatura||!$("manuData").value||!$("manuTipo").value){alert("Preencha a data e o tipo da manutenção.");return}const manut={viaturaId:id,prefixo:viatura.prefixo||"",data:$("manuData").value,tipo:$("manuTipo").value,km:$("manuKm").value?parseInt($("manuKm").value,10):null,status:$("manuStatus").value||"Executada",descricao:$("manuDesc").value.trim(),usuario:usuarioLogado,ts:Date.now()};try{await set(push(ref(db,"manutencoes")),manut);$("manuData").value=$("manuTipo").value=$("manuKm").value=$("manuDesc").value="";$("manuStatus").value="Executada";alert("Manutenção registrada com sucesso.")}catch(erro){alert(`Erro ao salvar manutenção: ${erro.code||erro.message}`)}});
     $("procEtapa").addEventListener("change",()=>{$("grupoEtapaOutro").hidden=$("procEtapa").value!=="Outro"});
     $("formProcessoBaixa").addEventListener("submit",async e=>{e.preventDefault();if(!usuarioLogado){alert("Entre no sistema para registrar o andamento da baixa.");return}if(!viatura||viatura.situacao!=="BAIXADA"){alert("Este acompanhamento só fica disponível para viaturas baixadas.");return}let etapa=$("procEtapa").value;if(etapa==="Outro")etapa=$("procEtapaOutro").value.trim();if(!$("procData").value||!etapa){alert("Informe a data e a etapa/status do processo.");return}const registro={viaturaId:id,prefixo:viatura.prefixo||"",data:$("procData").value,etapa,observacao:$("procObs").value.trim(),valorEstimado:$("procValor").value!==""?Number($("procValor").value):null,usuario:usuarioLogado,ts:Date.now()};try{await set(push(ref(db,"processosBaixa")),registro);$("procEtapa").value="";$("procEtapaOutro").value="";$("grupoEtapaOutro").hidden=true;$("procObs").value="";alert("Atualização da baixa registrada com sucesso.")}catch(erro){alert(`Erro ao salvar atualização: ${erro.code||erro.message}`)}});

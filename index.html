@@ -415,6 +415,13 @@
       const destino = card.getAttribute("data-target");
       if (!destino) return;
       const titulo  = card.querySelector(".card-cia-titulo")?.textContent?.trim() || "";
+      const chave = obterChaveModulo(destino);
+      if (chave === "BTL") {
+        sessionStorage.removeItem("frotaUsuario");
+        sessionStorage.removeItem("frotaModulo");
+        window.location.href = destino;
+        return;
+      }
       abrirModal(destino, titulo);
     });
   });
@@ -463,6 +470,8 @@
       return;
     }
 
+    sessionStorage.setItem("frotaUsuario", usuario.login);
+    sessionStorage.setItem("frotaModulo", moduloAlvo);
     window.location.href = destinoModulo;
   });
 </script>
