@@ -659,7 +659,7 @@
     messagingSenderId: "120947990174",
     appId: "1:120947990174:web:c02805ea916c62f950e58f",
     measurementId: "G-9SP9K5H0HE",
-    databaseURL: "https://frota18-a985c-default-rtdb.firebaseio.com/"
+    databaseURL: "https://gestaoviaturas-daf3e-default-rtdb.firebaseio.com/"
   };
 
 
@@ -907,7 +907,7 @@
     const obj = snapshot.val() || {};
     const arr = [];
     for (const [id, v] of Object.entries(obj)) {
-      if ((v.cia || "").toUpperCase().replace(/\s+/g, "") === "2CIA" || ("2CIA" === "FT" && ["FT","CIAFT","CIAFT.","CIAFTPM"].includes((v.cia||"").toUpperCase().replace(/\s+/g,"")))) arr.push({ id, ...v });
+      arr.push({ id, ...v, cia: "2CIA" });
     }
     viaturas = arr;
     preencherFiltroMunicipio();
@@ -939,7 +939,7 @@
     const obj = snapshot.val() || {};
     const arr = [];
     for (const [id, v] of Object.entries(obj)) {
-      if ((v.cia || "").toUpperCase().replace(/\s+/g, "") === "2CIA" || ("2CIA" === "FT" && ["FT","CIAFT","CIAFT.","CIAFTPM"].includes((v.cia||"").toUpperCase().replace(/\s+/g,"")))) arr.push({ id, ...v });
+      arr.push({ id, ...v, cia: "2CIA" });
     }
     manutencoes = arr;
     renderHistorico();
