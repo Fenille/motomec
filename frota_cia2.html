@@ -407,6 +407,64 @@
       color:#ff6b6b;
       font-weight:bold;
     }
+  
+    /* ===== MOBILE 2026: interface otimizada para celular ===== */
+    @media(max-width:700px){
+      body{background:#050509;overflow-x:hidden}
+      header{padding:12px 12px 10px;gap:10px;position:relative}
+      .titulo-box,.header-right{min-width:0;width:100%}
+      .titulo{font-size:1.05rem;line-height:1.25;letter-spacing:.05em}
+      .subtitulo{font-size:.74rem;line-height:1.35}
+      .header-right,.top-actions{align-items:stretch;width:100%}
+      .top-actions{display:grid;grid-template-columns:1fr;gap:7px}
+      .btn-voltar,.badge-sistema{width:100%;min-height:40px;justify-content:center;text-align:center}
+      main{padding:10px;gap:10px;display:flex;flex-direction:column}
+      .painel-esquerdo,.painel-direito{width:100%;min-width:0;order:initial;gap:10px}
+      .painel-esquerdo{order:0}.painel-direito{order:1}
+      .card{padding:11px;border-radius:13px}
+      .card-titulo{align-items:flex-start;gap:8px;margin-bottom:10px}
+      .card-titulo>span:first-child{width:100%;font-size:.82rem}
+      .indicadores{display:grid;grid-template-columns:repeat(3,1fr);width:100%;gap:5px}
+      .chip{padding:6px 5px;justify-content:center;font-size:.66rem;white-space:nowrap}
+      .filtros{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
+      .filtros .campo{min-width:0;width:100%}
+      .filtros .campo:last-child{grid-column:1/-1}
+      select,input,textarea{width:100%;font-size:16px;min-height:42px;padding:8px 11px}
+      textarea{min-height:76px}
+      .tabela-wrapper{overflow:visible;border:0;max-height:none;background:transparent}
+      table,tbody{display:block;width:100%}
+      thead{display:none}
+      tbody{display:flex;flex-direction:column;gap:8px}
+      tbody tr{display:grid;grid-template-columns:1fr 1fr;background:#09090e!important;border:1px solid rgba(255,255,255,.16);border-radius:12px;padding:9px 10px;gap:6px 10px;transform:none!important}
+      tbody td{display:flex;flex-direction:column;gap:2px;padding:0;white-space:normal;min-width:0;overflow-wrap:anywhere;font-size:.82rem}
+      tbody td::before{color:#8f8f8f;font-size:.58rem;text-transform:uppercase;letter-spacing:.09em;font-weight:700}
+      tbody td:nth-child(1)::before{content:"Município"} tbody td:nth-child(2)::before{content:"Programa"}
+      tbody td:nth-child(3)::before{content:"Prefixo"} tbody td:nth-child(4)::before{content:"Placa"}
+      tbody td:nth-child(5)::before{content:"Modelo"} tbody td:nth-child(6)::before{content:"Situação"}
+      tbody td:nth-child(7)::before{content:"Data baixa"} tbody td:nth-child(8)::before{content:"Dias baixada"}
+      tbody td:nth-child(9)::before{content:"Observação"}
+      tbody td:nth-child(3){font-size:1rem;font-weight:700;color:var(--amarelo-neon)}
+      tbody td:nth-child(9){grid-column:1/-1;border-top:1px solid rgba(255,255,255,.08);padding-top:6px}
+      .detalhes-header{gap:6px}.detalhes-titulo{font-size:.95rem}
+      .tag-mini{white-space:normal;line-height:1.35}
+      .acoes-detalhes{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+      .acoes-detalhes button{width:100%;min-height:42px;margin:0;padding:8px 7px;font-size:.68rem;letter-spacing:.05em}
+      .acoes-detalhes .btn-excluir{grid-column:1/-1}
+      .historico-lista{max-height:300px}
+      .hist-item{padding:9px;font-size:.78rem}
+      form .linha{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+      form .linha .campo,form>.campo{min-width:0;width:100%}
+      form button{width:100%;min-height:44px;align-self:stretch;margin-top:4px}
+      button{touch-action:manipulation}
+    }
+    @media(max-width:380px){
+      .filtros,form .linha,.acoes-detalhes{grid-template-columns:1fr}
+      .filtros .campo:last-child,.acoes-detalhes .btn-excluir{grid-column:auto}
+      tbody tr{grid-template-columns:1fr}
+      tbody td:nth-child(9){grid-column:auto}
+      .indicadores{grid-template-columns:1fr}
+    }
+
   </style>
 </head>
 <body>
